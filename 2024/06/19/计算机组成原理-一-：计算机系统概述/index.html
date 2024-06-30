@@ -20,28 +20,38 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Yuzhao&#39;s Blog">
-<meta property="og:url" content="http://example.com/index.html">
+  <meta name="description" content="一、引言 在不关注具体过程的情况下完成更多的重要操作，这种方法促进了文明的进步。  这句话是Patterson老爷子在他的书——《计算机组成与设计：硬件软件接口》（第五版）第一章最开头引用的一句话，它的确很符合我们现在的信息技术，我们很多人并不需要关注技术的原理是什么，仅仅会用就可以进行创造了。但是技术原理的世界其实也很酷，欢迎来到计算机的世界！ 这第一篇博客的引言就算是本系列总的引言叭，以此作为">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机组成原理(一)：计算机系统概述">
+<meta property="og:url" content="http://example.com/2024/06/19/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%80-%EF%BC%9A%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/index.html">
 <meta property="og:site_name" content="Yuzhao&#39;s Blog">
+<meta property="og:description" content="一、引言 在不关注具体过程的情况下完成更多的重要操作，这种方法促进了文明的进步。  这句话是Patterson老爷子在他的书——《计算机组成与设计：硬件软件接口》（第五版）第一章最开头引用的一句话，它的确很符合我们现在的信息技术，我们很多人并不需要关注技术的原理是什么，仅仅会用就可以进行创造了。但是技术原理的世界其实也很酷，欢迎来到计算机的世界！ 这第一篇博客的引言就算是本系列总的引言叭，以此作为">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2024/06/19/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%80-%EF%BC%9A%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/image-20240630144449651.png">
+<meta property="og:image" content="http://example.com/2024/06/19/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%80-%EF%BC%9A%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/image-20240630152833441.png">
+<meta property="article:published_time" content="2024-06-19T07:45:36.000Z">
+<meta property="article:modified_time" content="2024-06-30T07:39:47.567Z">
 <meta property="article:author" content="Yuzhao Peng">
+<meta property="article:tag" content="考研">
+<meta property="article:tag" content="计算机组成原理">
+<meta property="article:tag" content="笔记">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/06/19/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%80-%EF%BC%9A%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/image-20240630144449651.png">
 
-<link rel="canonical" href="http://example.com/">
+<link rel="canonical" href="http://example.com/2024/06/19/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%80-%EF%BC%9A%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : true,
-    isPost : false,
+    isHome : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>Yuzhao's Blog</title>
+  <title>计算机组成原理(一)：计算机系统概述 | Yuzhao's Blog</title>
   
 
 
@@ -150,9 +160,10 @@
         <div class="content-wrap">
           
 
-          <div class="content index posts-expand">
+          <div class="content post posts-expand">
             
-      
+
+    
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
@@ -168,10 +179,9 @@
       <meta itemprop="name" content="Yuzhao's Blog">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/06/19/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%80-%EF%BC%9A%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/" class="post-title-link" itemprop="url">计算机组成原理(一)：计算机系统概述</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          计算机组成原理(一)：计算机系统概述
+        </h1>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -228,147 +238,126 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="一、引言"><a href="#一、引言" class="headerlink" title="一、引言"></a>一、引言</h1><blockquote>
+        <h1 id="一、引言"><a href="#一、引言" class="headerlink" title="一、引言"></a>一、引言</h1><blockquote>
 <p><strong><em>在不关注具体过程的情况下完成更多的重要操作，这种方法促进了文明的进步。</em></strong></p>
 </blockquote>
 <p>这句话是Patterson老爷子在他的书——《计算机组成与设计：硬件软件接口》（第五版）第一章最开头引用的一句话，它的确很符合我们现在的信息技术，我们很多人并不需要关注技术的原理是什么，仅仅会用就可以进行创造了。但是技术原理的世界其实也很酷，欢迎来到计算机的世界！</p>
 <p>这第一篇博客的引言就算是本系列总的引言叭，以此作为开篇其实过于宏大，我所能做的仅仅是将我想到的零碎知识记录下来罢了，受个人水平所限，文章难免存在谬误，欢迎读者批评指正。【作者邮箱：3143935826@qq.com（<em>这里稍微吐槽一下，总听人嘲讽使用QQ邮箱，但是架不住这个真能看见，或许我需要养成定期查看邮件的习惯，如果有比较推荐的邮箱欢迎告诉我</em>）】</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2024/06/19/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%80-%EF%BC%9A%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-
-<div>
-  
-</div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2024/06/17/first-blog/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="Yuzhao Peng">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Yuzhao's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/06/17/first-blog/" class="post-title-link" itemprop="url">建站记录</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2024-06-17 15:35:25 / 修改时间：21:35:00" itemprop="dateCreated datePublished" datetime="2024-06-17T15:35:25+08:00">2024-06-17</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E8%AE%B0%E5%BD%95/" itemprop="url" rel="index"><span itemprop="name">记录</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>2k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="个人博客搭建记录"><a href="#个人博客搭建记录" class="headerlink" title="个人博客搭建记录"></a>个人博客搭建记录</h1><blockquote>
-<p>从第一次遇到bug在前人那里寻找到解决方案时就有了记录自己的解决历程的想法，但是一直都没有真正去做，因为在解决bug的时候通常都很急切，而当bug被解决之后又常常难以复现。过去也动过做一个本地博客的想法，也因为种种原因而未曾真正尝试，直至今日——种一棵树最好的时间是十年前，其次是现在——我决定将自己搭建个人博客的历程记录下来。</p>
-</blockquote>
-<h2 id="一、前言"><a href="#一、前言" class="headerlink" title="一、前言"></a>一、前言</h2><p>根据查阅的资料我们需要准备Git程序以及Github账号，但是这两步我都已经在过去的几年中陆陆续续完成，如何去下载安装以及申请账号网上应该也有很多教程，故本文不再从零开始。</p>
+<span id="more"></span>
+<h1 id="二、计算机系统层次结构"><a href="#二、计算机系统层次结构" class="headerlink" title="二、计算机系统层次结构"></a>二、计算机系统层次结构</h1><p>计算机系统包括两个部分<strong>软件系统</strong>和<strong>硬件系统</strong>，其中软件系统又包括<strong>系统软件</strong>和<strong>应用软件</strong>，在计算机组成原理这一个领域中我们更关注的是硬件系统。接下来我们会重点介绍计算机的硬件层次：</p>
+<ul>
+<li>主机<ul>
+<li>CPU（中央处理器）<ul>
+<li>运算器：CPU的核心，其核心是ALU（算术逻辑单元），包括通用寄存器、程序状态寄存器（标志寄存器，PSW）</li>
+<li>控制器：包括程序计数器（PC）、指令寄存器（IR）和控制单元（CU）</li>
+<li>Cache（高速缓存）</li>
+<li>MAR、MDR：即存储器<strong>地址</strong>寄存器和存储器<strong>数据</strong>寄存器，属于存储器的一部分，但在现代计算机中存在CPU当中</li>
+</ul>
+</li>
+<li>主存（内存）：按地址存取，即按照存储单元的地址进行存取</li>
+</ul>
+</li>
+<li>外设<ul>
+<li>辅存（外存）</li>
+<li>输入设备</li>
+<li>输出设备</li>
+</ul>
+</li>
+</ul>
+<p>其中，主存和辅存共同构成存储器结构；PC存放当前将要执行指令的地址（即下一条指令的地址），IR存放当前执行指令的地址。</p>
+<p>接下来介绍几个概念</p>
+<ul>
+<li><strong>软件和硬件的逻辑功能等价性</strong></li>
+</ul>
+<p>某一个功能既可以由硬件实现，又可以由软件实现，对于用户而言，它们是等价的。这一等价性被称为<strong>软/硬件逻辑功能的等价性</strong>，通常而言硬件和软件的实现方法在功能上是完全一致的，区别仅在于执行时间的长短，显而易见的<em>硬件实现的性能优于软件</em>。</p>
 <blockquote>
-<p>忽然明白为什么很多博客总是没有真正从零开始，大家应该有一些耐心去找寻资料，而不应该寄希望于某一篇博客能够解决所有问题。这里忽然想到前几天看过的一篇推文：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/-CdWyLpB-276RDStcNL0-Q">现在的年轻人已经不再尊重电脑了。</a></p>
-<p>很遗憾，虽然我的专业是计算机，但是我同样属于那一类不会使用电脑的人群，并且拥有一个急功近利的心，导致我从来没有想要真正深入去学习。</p>
+<p>【题外话】：请允许我偶尔以这样的方式插入一些感慨，这里让我再一次想到从开始学计算机就听到老师们常说的一个词——<strong>Trade-off</strong>，即权衡成本和性能，这是任何设计都需要考虑的事情。没有一个完美的设计，也没有一个绝对正确的设计，这真是为难我这个有些完美主义的人，我们所做的就是在权衡现有资源的情况下做出局部最优的设计，无论是算法还是计算机系统都是如此。</p>
 </blockquote>
-<p>关于Git的相关经验我在这里给出两个链接：</p>
-<ol>
-<li><a target="_blank" rel="noopener" href="https://www.liaoxuefeng.com/wiki/896043488029600">Git教程 - 廖雪峰的官方网站 (liaoxuefeng.com)</a></li>
-<li><a target="_blank" rel="noopener" href="https://learngitbranching.js.org/?locale=zh_CN">Learn Git Branching</a></li>
-</ol>
-<p>第一个链接时廖雪峰的一个Git教程，这是当初我大一的时候老师/助教给我们发的一个参考资料，里面给出了一些Git从零开始的下载安装以及使用的教程（说来惭愧，我只用到了一点点东西，并没有深究，很多技术都是在真正需要的时候才会去搜寻）；第二个链接是一个以可视化的方式让你熟悉Git命令的网站，值得一看。</p>
-<p>好了，闲话说了不少，接下来就是正式的搭建记录。另外，预告一下，或许我的博客未来也是这样的风格，有闲话，也有真实的经历。我会尽力提取最重要的东西记录，但是请允许我偶尔感慨一两句，或许以后我会将干货放在前面，把碎碎念留在最后也说不定；未来的风格或许会取决于我写那一篇博客的目的。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2024/06/17/first-blog/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
+<ul>
+<li><p><strong>几种翻译程序</strong></p>
+<p><strong>汇编器</strong>    将汇编语言程序翻译成机器语言程序</p>
+<p><strong>解释器</strong>    将源程序中的语句按执行顺序<strong>逐条</strong>翻译成机器指令并<strong>立即执行</strong></p>
+<p><strong>编译器</strong>    将高级语言程序翻译成汇编语言或机器语言程序</p>
+</li>
+<li><p><strong>ISA（Introductions Set Architecture，指令集体系结构）</strong></p>
+</li>
+</ul>
+<p>硬件和软件功能界面，定义计算机可以执行的所有指令的集合，属于<em>软件可见部分</em>。</p>
+<ul>
+<li><strong>从源程序到可执行文件</strong></li>
+</ul>
+<p><img src="/2024/06/19/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%80-%EF%BC%9A%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/image-20240630144449651.png" alt="image-20240630144449651"></p>
+<h1 id="三、计算机的性能指标【本章重点】"><a href="#三、计算机的性能指标【本章重点】" class="headerlink" title="三、计算机的性能指标【本章重点】"></a>三、计算机的性能指标【本章重点】</h1><h3 id="1-机器字长"><a href="#1-机器字长" class="headerlink" title="1.机器字长"></a>1.机器字长</h3><p>简称<strong>字长</strong>，是指计算机进行一次<strong>定点整数</strong>运算所能处理的二进制数据的位数，与CPU的寄存器位数、ALU有关。</p>
+<p><strong><em>机器字长、存储字长以及指令字长</em></strong></p>
+<ul>
+<li>机器字长：CPU内部用于整数运算的数据通路的宽度</li>
+<li>存储字长：存储单元包括若干存储元件，每个存储元件存储一位二进制代码（“0”或”1“），也就是说，每个存储单元可以存储一串二进制代码，即<strong>存储字</strong>。存储字的位数就是存储字长，通常情况下MDR的位数等于存储字长。</li>
+<li>指令字长：一个指令字中包含的二进制代码的位数，通常是存储字长的整数倍；取指令所需要的访存周期=指令字长/存储字长。</li>
+</ul>
+<h3 id="2-主存容量"><a href="#2-主存容量" class="headerlink" title="2.主存容量"></a>2.主存容量</h3><script type="math/tex; mode=display">\mathbf{主存容量=字数\times字长}</script><p>即，存储单元个数与字长之积，其中存储单元个数是MAR的位数、字长是MDR的位数。</p>
+<p><em>单位换算</em></p>
+<script type="math/tex; mode=display">
+K（千）\to M（兆）\to G\to T\to P\to E\to Z\\
+十进制以10^3进位，二进制以2^{10}进位</script><h3 id="3-运算速度"><a href="#3-运算速度" class="headerlink" title="3.运算速度"></a>3.运算速度</h3><p><strong>吞吐量</strong>    系统在单位时间内处理请求的数量，主要取决于主存的存取周期。</p>
+<p><strong>响应时间</strong>    从用户向计算机发送一个请求，到系统对该请求做出相应并获得所需结果的等待时间；包括CPU时间与等待时间（各种除CPU执行程序之外的开销）。</p>
+<p><strong>CPU时钟周期</strong>    CPU工作的最小时间单位，即机器内部主时钟脉冲信号的宽度。</p>
+<p><strong>主频（CPU时钟频率）</strong>    CPU时钟周期的倒数；对于<em>同一型号</em>的主机，主频越高，完成指令的一个执行步骤所用的时间越短，执行指令的速度越快。</p>
+<blockquote>
+<p><strong>【问题】主频高的CPU比主频低的CPU快？</strong></p>
+<p>衡量CPU运算速度的指标有很多，不能仅仅通过单独的某一个指标来判断CPU的好坏！</p>
+<p>同时我们解释一下<strong>基准程序</strong>，并不是说基准程序执行得越快就说明机器性能越好，一般情况下基准程序是可以反映机器性能的，但是由于基准程序的语句存在频度差异，因此我们不能仅仅以基准程序来判断机器的性能。举个例子，基准程序是我们的考试，考试的分数能够在一定程度上说明问题，但是我们不能唯分数论。</p>
+</blockquote>
+<p><strong>CPI（Cycle Per Instruction）</strong>    执行一条指令所需要的时钟周期数。</p>
+<blockquote>
+<p><strong>CPU执行时间</strong></p>
+<p>$CPU执行时间=CPU时钟周期数/主频=(指令条数\times CPI)\div主频$</p>
+</blockquote>
+<p><strong>IPS（Instructions Per Second）</strong>    每秒执行指令条数，$IPS=主频/CPI$。</p>
+<p><strong>MIPS（Million Instructions Per Second）</strong>    每秒执行百万指令条数；$MIPS=指令条数\div(执行时间\times10^6)=主频\div(CPI\times10^6)$</p>
+<p><img src="/2024/06/19/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%80-%EF%BC%9A%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/image-20240630152833441.png" alt="image-20240630152833441"></p>
+<h3 id="4-基准程序"><a href="#4-基准程序" class="headerlink" title="4.基准程序"></a>4.基准程序</h3><p>Benchmark，专门用来进行性能评价的一组程序，反应机器在运行实际负载时的性能，缺陷是基准程序的性能通常会与一小段短代码密切相关，硬件系统设计人员或编译器开发者可能会优化对于这一特定代码的执行从而影响性能评价。</p>
+
     </div>
 
 
 <div>
+  
+    <div>
+  
+    <div style="text-align:center;color: #7e0c6e;font-size:18px;">本文到此结束，欢迎邮件交流：3143935826@qq.com <i class="fa fa-paw"></i> ฅ&gt;ω&lt;*ฅ</div>
+  
+</div>
+
   
 </div>
 
     
     
     
+
       <footer class="post-footer">
-        <div class="post-eof"></div>
+          <div class="post-tags">
+              <a href="/tags/%E8%80%83%E7%A0%94/" rel="tag"># 考研</a>
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" rel="tag"># 计算机组成原理</a>
+              <a href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag"># 笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/06/17/first-blog/" rel="prev" title="建站记录">
+      <i class="fa fa-chevron-left"></i> 建站记录
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
       </footer>
+    
   </article>
   
   
-  
-
-
   
 
 
@@ -421,6 +410,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%BC%95%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">一、引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">二、计算机系统层次结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%9A%84%E6%80%A7%E8%83%BD%E6%8C%87%E6%A0%87%E3%80%90%E6%9C%AC%E7%AB%A0%E9%87%8D%E7%82%B9%E3%80%91"><span class="nav-number">3.</span> <span class="nav-text">三、计算机的性能指标【本章重点】</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%9C%BA%E5%99%A8%E5%AD%97%E9%95%BF"><span class="nav-number">3.0.1.</span> <span class="nav-text">1.机器字长</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%B8%BB%E5%AD%98%E5%AE%B9%E9%87%8F"><span class="nav-number">3.0.2.</span> <span class="nav-text">2.主存容量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E8%BF%90%E7%AE%97%E9%80%9F%E5%BA%A6"><span class="nav-number">3.0.3.</span> <span class="nav-text">3.运算速度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E5%9F%BA%E5%87%86%E7%A8%8B%E5%BA%8F"><span class="nav-number">3.0.4.</span> <span class="nav-text">4.基准程序</span></a></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
