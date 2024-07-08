@@ -20,20 +20,32 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="一、引言在本篇文章中我们将会探讨计算机中的数据表示，CS50中David">
+  <meta name="description" content="一、引言在本篇文章中我们将会探讨计算机中的数据表示，CS50x 2024 中Malan教授利用电灯泡简单的向学生们说明了原码二进制的数据表示方法，然而二进制不仅仅这么简单，让我们一起来探索一下吧~  【题外话】稍微吐槽一下字数统计和阅读时长估计，有点不太准，当个装饰好了。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="计算机组成原理(二)：数据的表示和运算">
 <meta property="og:url" content="http://example.com/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/index.html">
 <meta property="og:site_name" content="Yuzhao&#39;s Blog">
-<meta property="og:description" content="一、引言在本篇文章中我们将会探讨计算机中的数据表示，CS50中David">
+<meta property="og:description" content="一、引言在本篇文章中我们将会探讨计算机中的数据表示，CS50x 2024 中Malan教授利用电灯泡简单的向学生们说明了原码二进制的数据表示方法，然而二进制不仅仅这么简单，让我们一起来探索一下吧~  【题外话】稍微吐槽一下字数统计和阅读时长估计，有点不太准，当个装饰好了。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240705154841085.png">
+<meta property="og:image" content="http://example.com/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240705171154351.png">
+<meta property="og:image" content="http://example.com/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240705172732359.png">
+<meta property="og:image" content="http://example.com/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240705173949978.png">
+<meta property="og:image" content="http://example.com/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240707155305168.png">
+<meta property="og:image" content="http://example.com/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240707155615941.png">
+<meta property="og:image" content="http://example.com/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240707194847933.png">
+<meta property="og:image" content="http://example.com/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240707191757720.png">
+<meta property="og:image" content="http://example.com/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240707200352700.png">
+<meta property="og:image" content="http://example.com/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240708165349776.png">
+<meta property="og:image" content="http://example.com/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240708172523475.png">
 <meta property="article:published_time" content="2024-07-02T07:31:29.000Z">
-<meta property="article:modified_time" content="2024-07-02T09:06:24.185Z">
+<meta property="article:modified_time" content="2024-07-08T09:34:31.493Z">
 <meta property="article:author" content="Yuzhao Peng">
 <meta property="article:tag" content="考研">
 <meta property="article:tag" content="计算机组成原理">
 <meta property="article:tag" content="笔记">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240705154841085.png">
 
 <link rel="canonical" href="http://example.com/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/">
 
@@ -186,10 +198,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2024-07-02 15:31:29 / 修改时间：17:06:24" itemprop="dateCreated datePublished" datetime="2024-07-02T15:31:29+08:00">2024-07-02</time>
+              <time title="创建时间：2024-07-02 15:31:29" itemprop="dateCreated datePublished" datetime="2024-07-02T15:31:29+08:00">2024-07-02</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-07-08 17:34:31" itemprop="dateModified" datetime="2024-07-08T17:34:31+08:00">2024-07-08</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -210,7 +228,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>36</span>
+              <span>1.1k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -229,8 +247,261 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="一、引言"><a href="#一、引言" class="headerlink" title="一、引言"></a>一、引言</h1><p>在本篇文章中我们将会探讨计算机中的数据表示，CS50中David</p>
+        <h1 id="一、引言"><a href="#一、引言" class="headerlink" title="一、引言"></a>一、引言</h1><p>在本篇文章中我们将会探讨计算机中的数据表示，CS50x 2024 中Malan教授利用电灯泡简单的向学生们说明了原码二进制的数据表示方法，然而二进制不仅仅这么简单，让我们一起来探索一下吧~</p>
+<blockquote>
+<p>【题外话】稍微吐槽一下字数统计和阅读时长估计，有点不太准，当个装饰好了。</p>
+</blockquote>
 <span id="more"></span>
+<h1 id="二、进制的转换"><a href="#二、进制的转换" class="headerlink" title="二、进制的转换"></a>二、进制的转换</h1><p>常用的进位计数法包括十进制（Decimal）、二进制（Binary）、八进制（Octal）和十六进制（Hexadecimal），进位计数法由数码$K_i$（取值可以是$0,1\dots r-1$中的任意一个）和位权$r^i$（其中$r$是基数，即$r$进制）组成：</p>
+<script type="math/tex; mode=display">
+K_nK_{n-1}\dots K_0K_{-1}\dots K_{-m}=\sum\limits_{i=n}^{-m}K_ir^i= K_n\times r^n+K_{n-1}\times r^{n-1}+\dots +K_0\times r^0+K_{-1}\times r^{-1}+\dots +K_{-m}\times r^{-m}</script><h2 id="1-二进制转八进制-十六进制"><a href="#1-二进制转八进制-十六进制" class="headerlink" title="1.二进制转八进制/十六进制"></a>1.二进制转八进制/十六进制</h2><p><strong>二进制整数</strong>    从小数点开始向左数，每3个数为一组（八进制）或每4个数为一组（十六进制），在数的最左边空位补0，将其转换为对应的八进制或十六进制数码</p>
+<p><strong>二进制小数</strong>    从小数点开始向右数，每3个数为一组（八进制）或每4个数为一组（十六进制），在数的最右边空位补0，将其转换为对应的八进制或十六进制数码</p>
+<h2 id="2-八进制-十六进制转二进制"><a href="#2-八进制-十六进制转二进制" class="headerlink" title="2.八进制/十六进制转二进制"></a>2.八进制/十六进制转二进制</h2><p>对于八进制/十六进制数而言，将每一位数码改写为3位/4位二进制数即可，必要时可省略整数部分最高位或小数部分最低位的0</p>
+<p><strong><em>八进制与十六进制的转换可借助二进制作为中间桥梁</em></strong></p>
+<h2 id="3-R进制转十进制"><a href="#3-R进制转十进制" class="headerlink" title="3.R进制转十进制"></a>3.R进制转十进制</h2><p><strong>按权展开相加法</strong>    根据进位计数法的定义，将R进制数的数码与其位权相乘后相加之和即为对应的十进制数</p>
+<h2 id="4-十进制转R进制"><a href="#4-十进制转R进制" class="headerlink" title="4.十进制转R进制"></a>4.十进制转R进制</h2><p>十进制转R进制采用<strong>基数乘除法</strong>，具体包括<strong>除基取余法</strong>和<strong>乘基取整法</strong></p>
+<p><strong>整数部分</strong>    除基取余，倒排余数</p>
+<p><strong>小数部分</strong>    乘基取整</p>
+<blockquote>
+<p>【<strong>补充说明</strong>】</p>
+<p>在计算机中，小数是离散的，即不是所有的十进制小数都可以用二进制来表示，如0.3；归根结底还是位数有限。</p>
+</blockquote>
+<h1 id="三、定点数的编码表示"><a href="#三、定点数的编码表示" class="headerlink" title="三、定点数的编码表示"></a>三、定点数的编码表示</h1><p><strong>真值</strong>，即我们日常生活中所书写的带有正(<code>+</code>)负(<code>-</code>)号的数字。然而，还记得吗？计算机的语言是二进制，它所能识别的仅仅只有两种符号——0和1，因此我们需要一种新的方式来表示真值，即<strong>机器数</strong>。机器数将数据的符号数字化，通常情况下用“0”表示“正”、“1”表示“负”。根据小数点的位置是否固定，计算机中有两种数据格式：定点表示法和浮点表示法。</p>
+<p><img src="/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240705154841085.png" alt="image-20240705154841085"></p>
+<h2 id="1-原码"><a href="#1-原码" class="headerlink" title="1.原码"></a>1.原码</h2><p>用机器数的最高位作为符号位，用“0”表示“正”、“1”表示“负”，有定义式：</p>
+<script type="math/tex; mode=display">
+[x]_{原}=\begin{cases}0,x & 0\le x<2^n\\2^n-x=2^n+|x| & -2^n<x\le0\end{cases}(x是真值，字长为n+1)</script><p>原码整数表示范围为$-(2^n-1)\le x\le2^n-1$（关于原点对称），“0”有正负两种表示。</p>
+<h2 id="2-补码"><a href="#2-补码" class="headerlink" title="2.补码"></a>2.补码</h2><blockquote>
+<p>【题外话】在看这一部分的时候我总是想知道为什么这么设计，是谁想到的这种设计方法，有时候一开始探究背后的事情就不知不觉地钻牛角尖。直到现在我也没有一个确切的证据去说明是谁明确地提出了<strong>补码</strong>的概念，接下来我尝试解释一下补码的作用（以这个话题中最常用的钟表为例子）。这里我贴出两个链接：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/30395946/answer/328785755">计算机补码运算背后的数学原理是什么？ - 知乎 (zhihu.com)</a></li>
+</ul>
+<p>这篇文章用比较通俗的方式去解释了补码的合理性，语言比较浅显，术语相对较少，并且辅以简单的例子来说明。</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/645459759/answer/3406989493">补码的本质是什么？ - 知乎 (zhihu.com)</a></li>
+</ul>
+<p>这篇文章从数学的角度说明了补码的合理性，很遗憾，我的离散数学并没有学好，所以虽然我想要一个严谨的说明，但是数学基础并不支持我这样做，因此我不能判断这篇文章的正确性。</p>
+</blockquote>
+<p>原码与真值的对应关系很简单、直观，但是加减运算的逻辑对于计算机而言比较复杂：需要先判断两个数的符号，对于不同符号数的加法（同符号数的减法）而言，要先比较两个数的绝对值大小，然后用绝对值大的数减绝对值小的数，最后选择适合的符号。为了更方便的进行加减运算，我们引入了补码的概念。</p>
+<p>在介绍补码的概念之前，我们先补充一点数学上的小知识：</p>
+<p><strong>模</strong>    <a target="_blank" rel="noopener" href="https://baike.baidu.com/item/模运算/4376110">模运算_百度百科 (baidu.com)</a></p>
+<p><img src="/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240705171154351.png" alt="image-20240705171154351"></p>
+<p><strong>同余</strong>    正整数$a$，$b$对$p$取模，它们的余数相同，记做 $a \equiv b\ \%\ p$或者$a \equiv b\ (mod\ p)$</p>
+<blockquote>
+<p>【题外话】顺带补充一个取模和取余的区别：<a target="_blank" rel="noopener" href="https://blog.csdn.net/aggresss/article/details/120583049">模运算的概念和性质-CSDN博客</a></p>
+</blockquote>
+<p>我们以12为模长，那么可以得到如下一个圆环，即0、12、24……是模12等价的。</p>
+<p><img src="/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240705172732359.png" alt="image-20240705172732359"></p>
+<p><img src="/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240705173949978.png" alt="image-20240705173949978"></p>
+<p>我们现在指针指向的是10，要让指针指向7有两种方法：顺时针（下）转9格和逆时针（上）转3格，如果我们规定顺时针为加法、逆时针为减法，根据模运算的相关定义我们发现，$9\equiv-3(mod\ 12)$，并且两种方法得到的结果相同，因此我们可以将减法转换成加法来进行运算：</p>
+<script type="math/tex; mode=display">
+[x]_补-[y]_补=[x]_补+\overline{[y]_补}+1</script><p><a href="#appendix">小技巧</a>2</p>
+<p><strong>补码</strong>    定义式如下</p>
+<script type="math/tex; mode=display">
+[x]_{补}=\begin{cases}0,x & 0\le x<2^n\\2^{n+1}+x=2^{n+1}-|x| & -2^n\le x<0\end{cases}(mod\ 2^{n+1}，x是真值，字长为n+1)</script><p>补码整数表示范围为$-2^n\le x\le2^n-1$，比原码多表示了$-2^n$，几个特殊数据的补码说明：</p>
+<ul>
+<li>$[+0]<em>补=[-0]</em>补=\underbrace{0,00\dots0}_{n+1个}$，即0的补码唯一</li>
+<li>$[-1]<em>补=2^{n+1}-1=\underbrace{1,11\dots1}</em>{n+1个}$</li>
+<li>$[2^n-1]<em>补=0,\underbrace{11\dots1}</em>{n个}$</li>
+<li>$[-2^n]<em>补=1,\underbrace{00\dots0}</em>{n个}$</li>
+</ul>
+<p><strong>变形补码</strong>——模4补码    双符号位的补码，用于ALU中判断溢出，00表示正、11表示负，定义式如下</p>
+<script type="math/tex; mode=display">
+[x]_{变补}=\begin{cases}00,x & 0\le x<2^{n-1}\\2^{n+1}+x=2^{n+1}-|x| & -2^{n-1}\le x<0\end{cases}(mod\ 2^{n+1}，x是真值，字长为n+1)</script><h3 id="小技巧"><a href="#小技巧" class="headerlink" title="小技巧"></a><a id="appendix">小技巧</a></h3><p><strong>补码与真值的转换</strong>    正数补码与原码一致，负数对数码”按位取反、末位加一“；一个更加直接的经验：</p>
+<ol>
+<li>写符号位</li>
+<li>从右向左抄写数码，直至第一个数码1</li>
+<li>继续按位取反抄写数码</li>
+</ol>
+<p><strong>由$\mathbf{[x]<em>\textbf{补}}$直接求$\mathbf{[-x]</em>\textbf{补}}$</strong>    符号位和数值位均按位取反，末位加一</p>
+<h2 id="3-反码"><a href="#3-反码" class="headerlink" title="3.反码"></a>3.反码</h2><p>反码在应用上并没有太多实际的意义，它是由原码得到补码的中间产物，即将原码各位取反得到的数码。反码整数的表示范围$-(2^n-1)\le x\le2^n-1$</p>
+<h2 id="4-移码"><a href="#4-移码" class="headerlink" title="4.移码"></a>4.移码</h2><p>移码是在原码的基础上加了一个偏置值，只用来表示整数，常用来表示浮点数的阶码。定义式如下</p>
+<script type="math/tex; mode=display">
+[x]_{移}=2^n+x\ (-2^n\le x<2^n，机器字长为n+1)</script><ul>
+<li>$[+0]<em>移=[-0]</em>移=1,\underbrace{00\dots0}_{n个}$，即0的补码唯一</li>
+<li>$[-2^n]<em>移=\underbrace{0,00\dots0}</em>{n+1个}$</li>
+<li>$[2^n-1]<em>移=\underbrace{1,11\dots1}</em>{n+1个}$</li>
+</ul>
+<p><strong><em>一个真值的移码和补码仅相差一个符号位，即将$\mathbf{[x]<em>\textbf{补}}$的符号位取反为$\mathbf{[x]</em>\textbf{移}}$，</em>反之亦然。</strong>移码整数的表示范围$-2^n\le x\le2^n-1$</p>
+<p>上面这一条性质意味着：<strong>移码和其他编码方式相比，符号位的表示不同——0表示负、1表示正</strong>。</p>
+<h2 id="编码总结"><a href="#编码总结" class="headerlink" title="编码总结"></a>编码总结</h2><ul>
+<li>原码、反码、补码的符号位表示相同：0正1负，移码符号为表示相反：0负1正</li>
+<li>原码、反码的表示范围在数轴上对称，0有正负两种表示</li>
+<li>补码、移码的表示范围在数轴上不对称，0的表示唯一，在负方向上比原码、反码多表示一个数($-2^n$)</li>
+<li>原码和移码保持了数据原有的大小顺序，而对于反码和补码可采取以下方式：对于负数，数值位越小，其绝对值越大，即负得越多。</li>
+</ul>
+<h2 id="C语言中的数据表示——整数"><a href="#C语言中的数据表示——整数" class="headerlink" title="C语言中的数据表示——整数"></a>C语言中的数据表示——整数</h2><h3 id="1‘-无符号整数-amp-有符号整数"><a href="#1‘-无符号整数-amp-有符号整数" class="headerlink" title="1‘ 无符号整数&amp;有符号整数"></a>1‘ 无符号整数&amp;有符号整数</h3><p>编码无符号位，全部数位均解释为数值位，默认符号位为正。【可以看作最简单的二进制对应关系，是符合我们直觉的对应】</p>
+<p>将符号数值化，即我们前面所说的机器数，计算机中采用<strong>补码</strong>方式表示有符号整数（这里注意审题！）。</p>
+<h3 id="2‘-整型数据类型"><a href="#2‘-整型数据类型" class="headerlink" title="2‘ 整型数据类型"></a>2‘ 整型数据类型</h3><ul>
+<li><p>无符号    unsigned</p>
+<p>有符号    signed</p>
+</li>
+<li><p>字符型    char，8位，默认为<strong>无符号整数</strong>，以下其他数据类型默认为<strong>有符号整数</strong></p>
+<p>短整型    short/ short int，16位</p>
+<p>整型    int，32位</p>
+<p>长整型     long/long int，在32位机器中是32位、在64位机器中是64位</p>
+</li>
+</ul>
+<h3 id="3’-数据类型转换"><a href="#3’-数据类型转换" class="headerlink" title="3’ 数据类型转换"></a>3’ 数据类型转换</h3><p>强制类型转换的本质是改变对编码最高位的解释方式：符号——有符号数、数值——无符号数；C语言标准下，若有符号数和无符号数同时参与运算，按照无符号数处理。</p>
+<p>大字长变量转换为小字长变量时，直接截断高位部分；小字长变量转换为大字长变量时要进行高位扩展，需要分情况：</p>
+<ul>
+<li>无符号数——零扩展：即高位用0填充</li>
+<li>有符号数——符号扩展：即用符号位填充</li>
+</ul>
+<blockquote>
+<p>【题外话】在实现上其实可以统一为符号扩展，因为无符号数默认为正，或许可以把两种合并到一个代码里实现（只是一个思路，不一定比分开实现好用）。</p>
+</blockquote>
+<h1 id="四、溢出"><a href="#四、溢出" class="headerlink" title="四、溢出"></a>四、溢出</h1><blockquote>
+<p>或者说应该是<strong>算术溢出</strong>：<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/算术溢出/22785793">算术溢出_百度百科 (baidu.com)</a></p>
+</blockquote>
+<p>核心是<strong>超出机器数所能表示的范围</strong>。</p>
+<p><strong>标志位</strong></p>
+<ul>
+<li>OF：溢出标志，判断<strong>有符号数</strong>运算结果是否溢出。$OF=C<em>n\oplus C</em>{n-1}$，符号位和最高数值位进行异或操作，若OF为1，则表示溢出</li>
+<li>SF：符号标志，表示结果的符号，若SF为1，则表示负数；对于<strong>无符号数</strong>而言，OF和SF没有意义，注意：<em>这不意味着计算机计算的时候这些标志位是空的，而是说它们没有意义，计算机这个笨比是不认识什么是有符号数什么是无符号数的！</em></li>
+<li>ZF：零标志，判断结果是否为0，若ZF为1，则表示结果为0</li>
+<li>CF：进/借位标志，表示<strong>无符号数</strong>运算时的进位、借位，用于判断<strong>无符号数</strong>运算结果是否溢出。$CF=C<em>{in}\oplus C</em>{out}=Sub\oplus C_{out}$，进位输入和输出进行异或操作，若CF为1，则表示溢出</li>
+</ul>
+<blockquote>
+<p>【题外话】不用过分纠结为什么标志位是这样计算的，这是底层电路设计的结果，我们也不一定要抽象出一种数学公式语言去描述运算逻辑，我们只要能够大概理解原理就可以了，我们的描述都是和电路匹配的。（这里的吐槽来自于王道对于定点乘法运算基本原理部分的描述，它的来源是唐朔飞老师的教材，而教材中是以小数为例的，我们如果想直接看他这个总结的数学公式去计算整数乘法的话会发现有些不符合直觉的地方。当然，如果是整数，我们可以把小数点换成逗号看作占位符去做也没问题。）</p>
+<p>为什么我说这里的描述是和电路匹配的？</p>
+<p><img src="/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240707155305168.png" alt="image-20240707155305168"></p>
+<p><img src="/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240707155615941.png" alt="image-20240707155615941"></p>
+<p>这是两种不同的电路，都可以实现定点乘法运算，显然其逻辑并不完全一致。</p>
+</blockquote>
+<h2 id="1-溢出判断方法"><a href="#1-溢出判断方法" class="headerlink" title="1.溢出判断方法"></a>1.溢出判断方法</h2><p>只有当符号相同的两个数相加或者符号相异的两个数相减时才可能发生溢出。</p>
+<h3 id="1’-单符号位"><a href="#1’-单符号位" class="headerlink" title="1’ 单符号位"></a>1’ 单符号位</h3><script type="math/tex; mode=display">
+V=A_sB_s\overline{S_s}+\overline{A_sB_s}S_s</script><p>其中$A_s、B_s、S_s$分别代表两个操作数和结果的符号位，当$V=0$时，表示无溢出；当$V=1$时，表示溢出。</p>
+<h3 id="2‘-双符号位"><a href="#2‘-双符号位" class="headerlink" title="2‘ 双符号位"></a>2‘ 双符号位</h3><p>根据模4补码的定义，运算结果的两个符号位相同时，无溢出；当运算结果的两个符号位不同时，表示溢出，此时最高位符号位表示真正的符号，可以通过移位运算来弥补溢出。</p>
+<blockquote>
+<p>移位运算</p>
+<ol>
+<li>算术移位：将操作数视为<strong>有符号数</strong><ul>
+<li>左移：高位移出，低位补0，若移出的高位与结果的符号位不同，则溢出</li>
+<li>右移：低位移出，高位补符号位</li>
+</ul>
+</li>
+<li>逻辑移位<ul>
+<li>左移：高位移出，低位补0，若移出的高位是1，则溢出</li>
+<li>右移：低位移出，高位补0</li>
+</ul>
+</li>
+</ol>
+</blockquote>
+<script type="math/tex; mode=display">
+V=S_{s_1}\oplus S_{s_2}</script><p>其中$S<em>{s_1}、S</em>{s_2}$分别双符号位的高位和低位，当$V=0$时，表示无溢出；当$V=1$时，表示溢出。</p>
+<ul>
+<li>$S<em>{s_1}S</em>{s_2}=00$：正数，无溢出</li>
+<li>$S<em>{s_1}S</em>{s_2}=01$：正数，溢出</li>
+<li>$S<em>{s_1}S</em>{s_2}=10$：负数，溢出</li>
+<li>$S<em>{s_1}S</em>{s_2}=11$：负数，无溢出</li>
+</ul>
+<h3 id="3‘-单符号位-amp-进位"><a href="#3‘-单符号位-amp-进位" class="headerlink" title="3‘ 单符号位&amp;进位"></a>3‘ 单符号位&amp;进位</h3><script type="math/tex; mode=display">
+V=C_n\oplus C_{n-1}</script><p>其中$C<em>n、C</em>{n-1}$分别最高位（符号位）进位和次高位（数值位最高位）进位，当$V=0$时，表示无溢出；当$V=1$时，表示溢出。</p>
+<h2 id="2-比较大小"><a href="#2-比较大小" class="headerlink" title="2.比较大小"></a>2.比较大小</h2><h3 id="1’-无符号数"><a href="#1’-无符号数" class="headerlink" title="1’ 无符号数"></a>1’ 无符号数</h3><p>判断$A$和$B$的大小，通过减法$A-B$，根据结果的$CF$和$ZF$判断：</p>
+<ul>
+<li>$ZF=1：A=B$</li>
+<li>$ZF=0，CF=0：A&gt;B$</li>
+<li>$ZF=0，CF=1：A&lt;B$</li>
+</ul>
+<h3 id="2’-有符号数"><a href="#2’-有符号数" class="headerlink" title="2’ 有符号数"></a>2’ 有符号数</h3><p>判断$A$和$B$的大小，通过减法$[A]<em>补-[B]</em>补$，根据结果的$OF$、$SF$和$ZF$判断：</p>
+<ul>
+<li>$ZF=1：A=B$</li>
+<li>$ZF=0$<ul>
+<li>$OF=0$<ul>
+<li>$SF=0：A&gt;B$</li>
+<li>$SF=1：A&lt;B$</li>
+</ul>
+</li>
+<li>$OF=1$<ul>
+<li>$SF=0：A&lt;B$，即负数减正数</li>
+<li>$SF=1：A&gt;B$，即正数减负数</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="五、浮点数的表示与运算"><a href="#五、浮点数的表示与运算" class="headerlink" title="五、浮点数的表示与运算"></a>五、浮点数的表示与运算</h1><p>我们过去学习过科学记数法:$a\times10^n$，其中$1\le|a|&lt;10，n\in Z$，这其实就是一种浮点表示法，我们利用有限的空间表示了更大的数。浮点数在位数有限的情况下，既扩大了数的表示范围，又保持了数的有效精度。一般的浮点数表示：</p>
+<script type="math/tex; mode=display">
+N=(-1)^S\times M\times R^E</script><ul>
+<li>$S$取0或1，用来决定浮点数的符号</li>
+<li>$M$是定点小数，称为尾数</li>
+<li>$R$是基数</li>
+<li>$E$是定点整数，称为阶码或指数</li>
+<li>在二进制数据编码中，$R$隐含为2，$M$一般使用原码，$E$一般使用移码</li>
+</ul>
+<p><strong>溢出</strong>    数据下溢时，浮点数值趋于零，计算机会将其当作机器零处理。</p>
+<p><img src="/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240707194847933.png" alt="image-20240707194847933"></p>
+<p><img src="/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240707191757720.png" alt="image-20240707191757720"></p>
+<h2 id="1-规格化"><a href="#1-规格化" class="headerlink" title="1.规格化"></a>1.规格化</h2><p>对于以2为基数的原码，当$1/2\le|M|&lt;1$时，我们就称$N=(-1)^S\times M\times R^E$为规格化数：</p>
+<ul>
+<li><p>正数    $0,1\times\dots\times$</p>
+<p>最大值    $0,11\dots1=1-2^{-n}$</p>
+<p>最小值    $0,10\dots0=\frac{1}{2}$</p>
+<p>取值范围    $\frac{1}{2}\le M\le(1-2^{-n})$</p>
+</li>
+<li><p>负数    $1,1\times\dots\times$</p>
+<p>最大值    $1,10\dots0=-\frac{1}{2}$</p>
+<p>最小值    $1,11\dots1=-(1-2^{-n})$</p>
+<p>取值范围    $-(1-2^{-n})\le M\le-\frac{1}{2}$</p>
+</li>
+</ul>
+<p><strong>左规</strong>    当运算结果的尾数的最高数位不是有效位，即$\pm0,0\times\dots\times$，需要进行左规：尾数每左移一位、阶码减一。</p>
+<p><strong>右规</strong>    当运算结果的尾数有效位进到小数点前时，需要进行右规：尾数右移一位，阶码加一。<em>阶码可能会溢出</em></p>
+<h2 id="2-IEEE-754标准"><a href="#2-IEEE-754标准" class="headerlink" title="2.IEEE 754标准"></a>2.IEEE 754标准</h2><p><img src="/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240707200352700.png" alt="image-20240707200352700"></p>
+<p><img src="/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240708165349776.png" alt="image-20240708165349776"></p>
+<p><strong>注意：IEEE 754规定规格化的二进制浮点数尾数最高位总是1，作为隐藏位，因此23位尾数实际表示24位有效数字。</strong></p>
+<ul>
+<li>尾数    原码表示，隐藏位使得浮点数精度更高</li>
+<li>指数    移码表示，偏置为$2^{n-1}-1$，单精度和双精度偏置分别为127、1023</li>
+<li>规格化单精度真值 $(-1)^s\times(1+f)\times2^{e-127}$</li>
+<li>规格化双精度真值 $(-1)^s\times(1+f)\times2^{e-1023}$</li>
+</ul>
+<p><strong>IEEE 754 特殊情况</strong></p>
+<ol>
+<li>全0阶码全0尾数：$+0/-0$</li>
+<li>全1阶码全0尾数：$+\infty/-\infty$</li>
+<li>全1阶码非0尾数：NaN</li>
+<li>全0阶码非0尾数：非规格化数，可以用于处理阶码下溢</li>
+</ol>
+<h2 id="3-定点数与浮点数对比"><a href="#3-定点数与浮点数对比" class="headerlink" title="3.定点数与浮点数对比"></a>3.定点数与浮点数对比</h2><ul>
+<li>数值表示范围：字长相同的情况下，浮点数表示范围大</li>
+<li>精度：字长相同的情况下，定点数表示精度高</li>
+<li>溢出问题：浮点数溢出——规格化浮点数阶码溢出时溢出</li>
+</ul>
+<h2 id="4-加减运算"><a href="#4-加减运算" class="headerlink" title="4.加减运算"></a>4.加减运算</h2><p>对阶$\to$尾数运算$\to$规格化$\to$舍入</p>
+<ul>
+<li><p>对阶：小对大</p>
+<p>如果采用大阶码向小阶码看齐的原则，尾数需要左移，那么最高有效位会被移出。</p>
+</li>
+<li><p>尾数运算：注意还原隐藏位</p>
+</li>
+<li><p>规格化：规格化数形式$\pm1.\times\dots\times$</p>
+<ul>
+<li>左规：$\pm0.0\dots01\times\dots\times$</li>
+<li>右规：$\pm1\times.\times\dots\times$</li>
+</ul>
+</li>
+<li><p>舍入：</p>
+<ul>
+<li>就近舍入：0舍1入，恰好位于两个数中间时选择偶数</li>
+<li>正向舍入</li>
+<li>负向舍入</li>
+<li>截断法（趋向于原点的舍入）</li>
+</ul>
+</li>
+</ul>
+<h2 id="5-隐式类型转换"><a href="#5-隐式类型转换" class="headerlink" title="5.隐式类型转换"></a>5.隐式类型转换</h2><p>不同类型数混合运算——类型提升</p>
+<h1 id="六、字节序和对齐存储"><a href="#六、字节序和对齐存储" class="headerlink" title="六、字节序和对齐存储"></a>六、字节序和对齐存储</h1><p><strong>最低有效字节——LSB</strong></p>
+<p><strong>最高有效字节——MSB</strong></p>
+<p><strong>大端序</strong>    LSB存储在存储地址较高的地方</p>
+<p><strong>小端序</strong>    LSB存储在存储地址较低的地方</p>
+<p>以机器数01 23 45 67H为例</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">大端序 从左至右地址增高</span><br><span class="line">+-----+-----+-----+-----+-----+-----+</span><br><span class="line">  ... + 01H + 23H + 45H + 67H + ...</span><br><span class="line">+-----+-----+-----+-----+-----+-----+</span><br><span class="line">小端序 从左至右地址增高</span><br><span class="line">+-----+-----+-----+-----+-----+-----+</span><br><span class="line">  ... + 67H + 45H + 23H + 01H + ...</span><br><span class="line">+-----+-----+-----+-----+-----+-----+</span><br></pre></td></tr></table></figure>
+<p><img src="/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/image-20240708172523475.png" alt="image-20240708172523475"></p>
+<p><strong>C语言中结构体是小端、边界对齐存储</strong></p>
+<p><em>结构体成员：存储起始地址%成员长度=0</em></p>
+<p><em>结构体长度为成员最大对齐值的整数倍</em></p>
 
     </div>
 
@@ -325,7 +596,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%BC%95%E8%A8%80"><span class="nav-text">一、引言</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%BC%95%E8%A8%80"><span class="nav-text">一、引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E8%BF%9B%E5%88%B6%E7%9A%84%E8%BD%AC%E6%8D%A2"><span class="nav-text">二、进制的转换</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E4%BA%8C%E8%BF%9B%E5%88%B6%E8%BD%AC%E5%85%AB%E8%BF%9B%E5%88%B6-%E5%8D%81%E5%85%AD%E8%BF%9B%E5%88%B6"><span class="nav-text">1.二进制转八进制&#x2F;十六进制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%85%AB%E8%BF%9B%E5%88%B6-%E5%8D%81%E5%85%AD%E8%BF%9B%E5%88%B6%E8%BD%AC%E4%BA%8C%E8%BF%9B%E5%88%B6"><span class="nav-text">2.八进制&#x2F;十六进制转二进制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-R%E8%BF%9B%E5%88%B6%E8%BD%AC%E5%8D%81%E8%BF%9B%E5%88%B6"><span class="nav-text">3.R进制转十进制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%8D%81%E8%BF%9B%E5%88%B6%E8%BD%ACR%E8%BF%9B%E5%88%B6"><span class="nav-text">4.十进制转R进制</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%AE%9A%E7%82%B9%E6%95%B0%E7%9A%84%E7%BC%96%E7%A0%81%E8%A1%A8%E7%A4%BA"><span class="nav-text">三、定点数的编码表示</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%8E%9F%E7%A0%81"><span class="nav-text">1.原码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E8%A1%A5%E7%A0%81"><span class="nav-text">2.补码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E6%8A%80%E5%B7%A7"><span class="nav-text">小技巧</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%8F%8D%E7%A0%81"><span class="nav-text">3.反码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E7%A7%BB%E7%A0%81"><span class="nav-text">4.移码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E7%A0%81%E6%80%BB%E7%BB%93"><span class="nav-text">编码总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C%E8%AF%AD%E8%A8%80%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E8%A1%A8%E7%A4%BA%E2%80%94%E2%80%94%E6%95%B4%E6%95%B0"><span class="nav-text">C语言中的数据表示——整数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E2%80%98-%E6%97%A0%E7%AC%A6%E5%8F%B7%E6%95%B4%E6%95%B0-amp-%E6%9C%89%E7%AC%A6%E5%8F%B7%E6%95%B4%E6%95%B0"><span class="nav-text">1‘ 无符号整数&amp;有符号整数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E2%80%98-%E6%95%B4%E5%9E%8B%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-text">2‘ 整型数据类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E2%80%99-%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2"><span class="nav-text">3’ 数据类型转换</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E6%BA%A2%E5%87%BA"><span class="nav-text">四、溢出</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E6%BA%A2%E5%87%BA%E5%88%A4%E6%96%AD%E6%96%B9%E6%B3%95"><span class="nav-text">1.溢出判断方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E2%80%99-%E5%8D%95%E7%AC%A6%E5%8F%B7%E4%BD%8D"><span class="nav-text">1’ 单符号位</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E2%80%98-%E5%8F%8C%E7%AC%A6%E5%8F%B7%E4%BD%8D"><span class="nav-text">2‘ 双符号位</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E2%80%98-%E5%8D%95%E7%AC%A6%E5%8F%B7%E4%BD%8D-amp-%E8%BF%9B%E4%BD%8D"><span class="nav-text">3‘ 单符号位&amp;进位</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E6%AF%94%E8%BE%83%E5%A4%A7%E5%B0%8F"><span class="nav-text">2.比较大小</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E2%80%99-%E6%97%A0%E7%AC%A6%E5%8F%B7%E6%95%B0"><span class="nav-text">1’ 无符号数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E2%80%99-%E6%9C%89%E7%AC%A6%E5%8F%B7%E6%95%B0"><span class="nav-text">2’ 有符号数</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E6%B5%AE%E7%82%B9%E6%95%B0%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E8%BF%90%E7%AE%97"><span class="nav-text">五、浮点数的表示与运算</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E8%A7%84%E6%A0%BC%E5%8C%96"><span class="nav-text">1.规格化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-IEEE-754%E6%A0%87%E5%87%86"><span class="nav-text">2.IEEE 754标准</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%AE%9A%E7%82%B9%E6%95%B0%E4%B8%8E%E6%B5%AE%E7%82%B9%E6%95%B0%E5%AF%B9%E6%AF%94"><span class="nav-text">3.定点数与浮点数对比</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%8A%A0%E5%87%8F%E8%BF%90%E7%AE%97"><span class="nav-text">4.加减运算</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E9%9A%90%E5%BC%8F%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2"><span class="nav-text">5.隐式类型转换</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E5%AD%97%E8%8A%82%E5%BA%8F%E5%92%8C%E5%AF%B9%E9%BD%90%E5%AD%98%E5%82%A8"><span class="nav-text">六、字节序和对齐存储</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -396,13 +667,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">5k</span>
+    <span title="站点总字数">6k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">4 分钟</span>
+    <span title="站点阅读时长">5 分钟</span>
 </div>
 
         
