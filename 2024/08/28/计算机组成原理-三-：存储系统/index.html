@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="一、引言在上一篇文章中我们了解了计算机中数据的表示和运算，那么在本篇文章中我们将继续探索数据在计算机中是如何存储的，现在让我们开始吧！">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机组成原理(三)：存储系统">
+<meta property="og:url" content="http://example.com/2024/08/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%89-%EF%BC%9A%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/index.html">
+<meta property="og:site_name" content="Yuzhao&#39;s Blog">
+<meta property="og:description" content="一、引言在上一篇文章中我们了解了计算机中数据的表示和运算，那么在本篇文章中我们将继续探索数据在计算机中是如何存储的，现在让我们开始吧！">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2024/08/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%89-%EF%BC%9A%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/image-20240712161001084.png">
+<meta property="og:image" content="http://example.com/2024/08/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%89-%EF%BC%9A%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/image-20240715153240772.png">
+<meta property="og:image" content="http://example.com/2024/08/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%89-%EF%BC%9A%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/image-20240717194322524.png">
+<meta property="og:image" content="http://example.com/2024/08/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%89-%EF%BC%9A%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/image-20240712171623075.png">
+<meta property="og:image" content="http://example.com/2024/08/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%89-%EF%BC%9A%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/image-20240822201614872.png">
+<meta property="og:image" content="http://example.com/2024/08/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%89-%EF%BC%9A%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/image-20240827100206654.png">
+<meta property="og:image" content="http://example.com/2024/08/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%89-%EF%BC%9A%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/image-20240827164730587.png">
+<meta property="og:image" content="http://example.com/2024/08/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%89-%EF%BC%9A%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/image-20240827192013788.png">
+<meta property="article:published_time" content="2024-08-28T03:07:11.000Z">
+<meta property="article:modified_time" content="2024-08-28T03:08:04.559Z">
+<meta property="article:author" content="Yuzhao Peng">
+<meta property="article:tag" content="考研">
+<meta property="article:tag" content="计算机组成原理">
+<meta property="article:tag" content="笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/08/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%89-%EF%BC%9A%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/image-20240712161001084.png">
+
+<link rel="canonical" href="http://example.com/2024/08/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%89-%EF%BC%9A%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>计算机组成原理(三)：存储系统 | Yuzhao's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Yuzhao's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/08/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%89-%EF%BC%9A%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Yuzhao Peng">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yuzhao's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          计算机组成原理(三)：存储系统
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-08-28 11:07:11 / 修改时间：11:08:04" itemprop="dateCreated datePublished" datetime="2024-08-28T11:07:11+08:00">2024-08-28</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%80%83%E7%A0%94/" itemprop="url" rel="index"><span itemprop="name">考研</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%80%83%E7%A0%94/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>9.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="一、引言"><a href="#一、引言" class="headerlink" title="一、引言"></a>一、引言</h1><p>在上一篇文章中我们了解了计算机中数据的表示和运算，那么在本篇文章中我们将继续探索数据在计算机中是如何存储的，现在让我们开始吧！</p>
+<span id="more"></span>
+<h1 id="二、存储器的层次结构"><a href="#二、存储器的层次结构" class="headerlink" title="二、存储器的层次结构"></a>二、存储器的层次结构</h1><p><img src="/2024/08/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%89-%EF%BC%9A%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/image-20240712161001084.png" alt="image-20240712161001084"></p>
+<p>存储器这里的核心思想是<strong>trade-off</strong>，“想马儿跑但又想马儿少吃草”是不现实的，因此我们必须在这两者中权衡找到一个性能和成本都可以接受的方案，这就是我们的存储器层次结构（如上图所示）。存储器层次结构的核心思想是<strong>上层存储器作为下层相邻存储器的高速缓存</strong>。</p>
+<p>根据不同的教科书，磁盘、磁带和光盘的层级可能不同，可能会将其分为辅存和外存两个层级，也可能同属于一个层级；在这里我们重点强调两个层级：<em>Cache-主存层</em>和<em>主存-辅存层</em>：</p>
+<ul>
+<li>Cache-主存层主要解决的是CPU和主存速度不匹配的问题，主存和Cache之间的数据调度是由硬件自动完成的，对于所有程序员透明</li>
+<li>主存-辅存层主要解决的是存储系统容量问题，主存和辅存之间的数据调度由硬件和操作系统共同完成，对于应用程序员透明</li>
+</ul>
+<p><strong>分类</strong></p>
+<ul>
+<li>按层级分类：主存（内存）、辅存（外存）、Cache（高速缓冲存储器）</li>
+<li>按存储介质分类：磁表面存储器、磁芯存储器、半导体存储器（MOS型、双极型）、光存储器</li>
+<li><strong>按存取方式分类</strong><ul>
+<li>随机存储器（RAM）：读写存储单元的时间与其所在的物理位置无关，主要用于主存和Cache，包括静态和动态两种</li>
+<li>只读存取器（ROM）：可随机读取不可写入，通常作为主存的地址域；现在还有派生的类型，保留ROM原本的非易失性，写入速度远远慢于读取速度</li>
+<li>串行访问存储器<ul>
+<li>顺序存取存储器（SAM）：读写存储单元的时间取决于其所在的物理位置</li>
+<li>直接存取存储器（DAM）：结合随机存取和顺序存取的特性，先直接选取信息所在的区域，然后按顺序方式存取</li>
+</ul>
+</li>
+<li>相联存储器（CAM）：可以按内容访问的存储器，即能够按照内容检索到存储位置并进行读写。<strong>注意：相联存储器既可以按内容寻址，也可以按地址寻址。</strong></li>
+</ul>
+</li>
+<li>按信息可保存性分类：易失性存储器（如：RAM）、非易失性存储器（如：ROM）；</li>
+</ul>
+<blockquote>
+<p><strong>破坏性读出</strong>：某个存储单元所存储的信息被读出时，原存储信息被破坏。具有破坏性读出性能的存储器，每次读出操作后，必须紧接一个再生操作恢复被破坏的信息。</p>
+</blockquote>
+<h1 id="性能指标"><a href="#性能指标" class="headerlink" title="性能指标"></a>性能指标</h1><p><strong>存储容量</strong></p>
+<script type="math/tex; mode=display">
+存储容量=存储字数\times字长</script><p>其中，存储字数表示存取器的地址空间大小，字长表示<strong>一次存取操作的数据量</strong></p>
+<p><strong>单位成本</strong></p>
+<script type="math/tex; mode=display">
+单位成本=\frac{总成本}{总容量}</script><p><strong>存储速度</strong></p>
+<script type="math/tex; mode=display">
+数据传输速率=\frac{数据宽度}{存取周期}</script><ul>
+<li>存取周期$T_m$：存储器进行一次完整存/取的开销，两次连续独立访问存储器操作之间的最小时间间隔，通常情况下存取周期大于存取时间，如下图所示</li>
+<li>存取时间$T_a$：存储器操作的时间</li>
+<li>主存带宽$B_m$：数据传输速率，每秒从主存中进出信息的最大数据量，单位为字/秒、字节/秒、位/秒</li>
+</ul>
+<p><img src="/2024/08/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%89-%EF%BC%9A%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/image-20240715153240772.png" alt="image-20240715153240772"></p>
+<p><strong>一次完整的刷新过程占用一个存取周期</strong></p>
+<h1 id="三、主存储器"><a href="#三、主存储器" class="headerlink" title="三、主存储器"></a>三、主存储器</h1><h2 id="1-SRAM芯片和DRAM芯片"><a href="#1-SRAM芯片和DRAM芯片" class="headerlink" title="1.SRAM芯片和DRAM芯片"></a>1.SRAM芯片和DRAM芯片</h2><div class="table-container">
+<table>
+<thead>
+<tr>
+<th>特点\类型</th>
+<th>SRAM（静态RAM）</th>
+<th>DRAM（动态RAM）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>存储元件</td>
+<td>双稳态触发器</td>
+<td>电容</td>
+</tr>
+<tr>
+<td>破坏性读出</td>
+<td>否</td>
+<td>是</td>
+</tr>
+<tr>
+<td>需要刷新</td>
+<td>否</td>
+<td>是</td>
+</tr>
+<tr>
+<td>运行速度</td>
+<td>快</td>
+<td>慢</td>
+</tr>
+<tr>
+<td>存储成本</td>
+<td>高</td>
+<td>低</td>
+</tr>
+<tr>
+<td>集成度</td>
+<td>低</td>
+<td>高</td>
+</tr>
+<tr>
+<td>功耗</td>
+<td>高</td>
+<td>低</td>
+</tr>
+<tr>
+<td>易失性</td>
+<td>是</td>
+<td>是</td>
+</tr>
+<tr>
+<td>送行列地址</td>
+<td>同时送</td>
+<td>分两次送，地址线复用技术</td>
+</tr>
+<tr>
+<td>主要用途</td>
+<td>Cache</td>
+<td>主存</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>刷新通常以<strong>行</strong>为单位进行，采用<strong>读后再生</strong>的方式进行。对同一行进行相邻两次刷新的时间间隔为<strong>刷新周期</strong>，通常取2ms。常用的刷新方式:</p>
+<p><img src="/2024/08/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%89-%EF%BC%9A%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/image-20240717194322524.png" alt="image-20240717194322524"></p>
+<ul>
+<li><p>集中刷新：在一个刷新周期内，利用一段固定的时间，依次对存储器的所有行进行逐一再生，在此期间停止对存储器的读/写操作，称为<strong>死时间</strong>，也称为<strong>访存死区</strong>。</p>
+<ul>
+<li>优点：读/写操作期间不受刷新操作的影响</li>
+<li>缺点：死区无法进行访存</li>
+</ul>
+</li>
+<li><p>分散刷新：将一个存储器系统的工作周期分成两部分——读/写和刷新，该方法的刷新方式增加了系统的存取周期，<em>即现在的存取周期为两倍的读写周期（刷新的本质是读出重写）</em>。</p>
+<ul>
+<li>优点：无死区</li>
+<li>缺点：加长了系统的存取周期</li>
+</ul>
+</li>
+<li><p>异步刷新：在一个刷新周期内每一行仅刷新一次。记相邻两行之间刷新的时间间隔$t$，即每隔时间$t$产生一次刷新请求</p>
+<script type="math/tex; mode=display">
+t=T/r</script><p>其中，T是刷新周期，r是行数。</p>
+</li>
+</ul>
+<p><strong>SDRAM</strong>    同步DRAM芯片，与传统的异步DRAM不同，SDRAM与CPU的数据交换同步于系统的时钟信号。SDRAM支持突发传输方式，即在寻址阶段发送数据单元的首地址，在传输阶段传送多个连续单元的数据，第一次存取的时候给出首地址，同一行的所有数据都被送到行缓冲器，即此后的每一个时钟中都可以连续地从SDRAM输出一个数据。<strong>行缓冲器</strong>用来缓存指定行中整行的数据，其大小为<strong>列数$\mathbf{\times}$位平面数</strong>，<strong>通常使用SRAM实现</strong>。</p>
+<blockquote>
+<p><strong>位平面</strong></p>
+<p>计算机系统基础（第二版） (袁春风) </p>
+<p>采用三维结构存储阵列的芯片用多个位平面构成存储阵列，不同位平面在同一行、列交叉点上的多位构成一个存储字。</p>
+<p>即，<strong>位平面数=存储字数</strong></p>
+<script type="math/tex; mode=display">
+\begin{align}
+存储容量=&存储字数（存储单元数）\times存储字长\\
+=&（存储阵列）行数\times（存储阵列）列数\times位平面数
+\end{align}</script></blockquote>
+<p><img src="/2024/08/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%89-%EF%BC%9A%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/image-20240712171623075.png" alt="image-20240712171623075"></p>
+<p>如上图所示，为了工程上的易实现性，我们将存储单元按照二维的方式排列，采用行列地址来减少选通线的数量。</p>
+<p><strong>DRAM地址线复用技术</strong>    由于DRAM芯片的容量较大、地址位数较多，故为了减少芯片的地址引脚数，通常采用地址线复用技术——行地址、列地址分两次先后通过相同的地址线进行传输。</p>
+<p><strong>DRAM芯片行、列数优化原则</strong></p>
+<p>假定DRAM的存储容量为$2^n\times b$位，行数为$r$、列数为$c$，则有$r\times c=2^n$。</p>
+<ul>
+<li>由于DRAM采用行刷新，为了减小刷新开销，存储阵列的行数应该尽可能小，即$r\le c$</li>
+<li>同时，DRAM采用地址线复用技术，为了使得地址线尽可能的少，存储阵列的行列数应该尽可能相同，即$|r-c|$尽可能小</li>
+</ul>
+<h2 id="2-只读存储器"><a href="#2-只读存储器" class="headerlink" title="2.只读存储器"></a>2.只读存储器</h2><p>上一小节中我们整理了RAM的相关知识点，RAM属于易失性存储器，即断电后数据不会被保存在硬件中；在本小节中我们继续整理非易失性存储器——ROM。</p>
+<ul>
+<li><p>MROM（Mask Read-Only Memory）掩模式只读存储器</p>
+<ul>
+<li>优点：可靠性高、集成度高、价格便宜</li>
+<li>缺点：灵活性差</li>
+</ul>
+</li>
+<li><p>PROM（Programmable Read-Only Memory）可编程只读存储器</p>
+<ul>
+<li>优点：可编程</li>
+<li>缺点：一次写入</li>
+</ul>
+</li>
+<li><p>EPROM（Erasable Programmable Read-Only Memory）可擦除可编程只读存储器</p>
+<ul>
+<li>优点：可多次写入</li>
+<li>缺点：编程次数有限，写入时间过长</li>
+<li>UVEPROM（ultraviolet rays）紫外线擦除，擦除所有信息</li>
+<li>EEPROM（electrically）电擦除，擦除特定的字</li>
+</ul>
+</li>
+<li><p>Flash存储器——闪存</p>
+<p>在EEPROM上发展而来，非易失性存储器，可进行多次快速的擦除重写。<strong>先擦除后写入，”写“比“读”慢</strong></p>
+<blockquote>
+<p>U盘是基于Flash存储器技术的一种存储器，因此U盘是ROM。</p>
+</blockquote>
+</li>
+<li><p>固态硬盘（SSD，Solid State Drives）</p>
+<p>控制单元+flash芯片，可进行多次快速的擦除重写，速度快、功耗低，但价格高</p>
+</li>
+</ul>
+<h2 id="3-主存储器的结构"><a href="#3-主存储器的结构" class="headerlink" title="3.主存储器的结构"></a>3.主存储器的结构</h2><p><img src="/2024/08/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%89-%EF%BC%9A%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/image-20240822201614872.png" alt="image-20240822201614872"></p>
+<p>在这里我们回顾几个基本概念：</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th></th>
+<th>MAR</th>
+<th>MDR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>名称</td>
+<td>Memory Address Register，存储器地址寄存器</td>
+<td>Memory Data Register，存储器数据寄存器</td>
+</tr>
+<tr>
+<td>内容</td>
+<td>将要访问的存储单元的地址</td>
+<td>从存储单元中读取的数据；将要写入存储单元的数据</td>
+</tr>
+<tr>
+<td>位数含义</td>
+<td>假设MAR的位数为n，则存储器芯片存储单元的个数为$2^n$</td>
+<td>存储字长</td>
+</tr>
+<tr>
+<td>位数</td>
+<td>地址线</td>
+<td>数据线</td>
+</tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li><p>存储体$\supset$存储单元【对应于存储字】$\supset$存储元件（记忆单元）【对应于位】</p>
+</li>
+<li><p><strong>存储容量</strong></p>
+<script type="math/tex; mode=display">
+存储容量=存储字数\times字长</script><p>其中，存储字数表示存取器的地址空间大小，字长表示<strong>一次存取操作的数据量</strong>；若已知地址线和数据线分别为$m$和$n$根，那么存储容量为$2^m\times n$位。</p>
+</li>
+</ul>
+<h2 id="4-双端口RAM和多模块存储器"><a href="#4-双端口RAM和多模块存储器" class="headerlink" title="4.双端口RAM和多模块存储器"></a>4.双端口RAM和多模块存储器</h2><h3 id="1‘-双端口RAM"><a href="#1‘-双端口RAM" class="headerlink" title="1‘ 双端口RAM"></a>1‘ 双端口RAM</h3><p>双端口RAM存在的意义是优化多核CPU访问一根内存条的速度，使得一个RAM可以同时被两个CPU访问：</p>
+<ul>
+<li>两个端口同时对不同地址单元进行存取&#x2714;</li>
+<li>两个端口同时对同一地址单元进行读取数据&#x2714;</li>
+<li>两个端口同时对同一地址单元进行写入数据&#x2716;</li>
+<li>两个端口同时对同一地址单元进行数据写入和读取&#x2716;</li>
+</ul>
+<blockquote>
+<p>操作系统”读者-写者问题“</p>
+</blockquote>
+<h3 id="2‘-单体多字存储器"><a href="#2‘-单体多字存储器" class="headerlink" title="2‘ 单体多字存储器"></a>2‘ 单体多字存储器</h3><p>多模块存储器是一种<strong>空间并行技术</strong>。单体多字系统中，每个存储单元存储m个字，一次访问可并行读取m个字，因此总线宽度也是m个字。</p>
+<p><strong>缺点</strong>    需要将数据连续存放</p>
+<h3 id="3‘-多体并行存储器"><a href="#3‘-多体并行存储器" class="headerlink" title="3‘ 多体并行存储器"></a>3‘ 多体并行存储器</h3><p>与单体多字存储器类似，但是每个模块<strong>有独立的读/写控制电路、地址寄存器和数据寄存器</strong>，同时每个模块具有相同的容量和存取速度。</p>
+<ul>
+<li><strong>高位交叉编址</strong>（顺序编址）</li>
+</ul>
+<p>高位地址表示模块号（体号），低位地址表示模块内地址。根据这种编址方式我们可以发现，在访问一个连续主存块时，我们总是先在一个模块的内部访问，在访问完该模块后再顺序访问下一个模块，各个模块不能被并行访问，无法提高吞吐率。</p>
+<ul>
+<li><strong>低位交叉编址</strong></li>
+</ul>
+<p>低位地址表示模块号，高位地址表示模块内地址。如果每个模块按照“模m”交叉编址，那么模块号=单元地址%m。</p>
+<p>交叉编址存储器可以采用<strong>轮流启动</strong>或<strong>同时启动</strong>两种方式：</p>
+<ul>
+<li><p>轮流启动</p>
+<p>每个模块一次读/写的位数恰好等于总线位数。</p>
+<p>若记模块的存取周期为$T$，存取时间（或总线传输周期，均表示CPU读取瓶颈）为$r$，那么存储器模块数应该大于等于$T/r$，而为了更好的利用模块资源应该取等号。</p>
+<blockquote>
+<p>在理想条件下，连续存取$m$个字所需时间$t=T+(m-1)\times r$，相较于一般存储器$t^{\prime}=m\times T$而言有了很大提升。</p>
+</blockquote>
+</li>
+<li><p>同时启动</p>
+<p>所有模块一次并行读/写的位数恰好等于总线位数。忽略地址低位的体号，不进行选体，直接根据高位地址的存储单元号同时将$m$个存储体里符合的存储字读取出来，即在一个存取周期内可以读出$m$个存储字，因此</p>
+<script type="math/tex; mode=display">
+总线宽度=存储字长\times模块数m</script><blockquote>
+<p>类似于位扩展</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="5-主存储器容量的扩展"><a href="#5-主存储器容量的扩展" class="headerlink" title="5.主存储器容量的扩展"></a>5.主存储器容量的扩展</h2><p>单个芯片容量有限，因此内存实际上是由多个芯片集成的，回顾存储容量的计算（这个公式在这一章已经出现了好几次了）：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+存储容量=&存储字数\times存储字长\\
+=&行数\times列数\times位平面数
+\end{align}</script><p>通过以上公式，我们很容易想到主存储器容量的扩展的两个思路：</p>
+<ul>
+<li>增加存储字数——增加存储单元的数量</li>
+<li>增加存储字长</li>
+</ul>
+<p>分别对应于接下来的两个小节：字扩展法和位扩展法。</p>
+<h3 id="1‘-位扩展法"><a href="#1‘-位扩展法" class="headerlink" title="1‘ 位扩展法"></a>1‘ 位扩展法</h3><p>位扩展法，对字长进行扩展，即增加存储字长，适用于CPU的数据线数量大于存储芯片的数据位数。</p>
+<h3 id="2‘-字扩展法"><a href="#2‘-字扩展法" class="headerlink" title="2‘ 字扩展法"></a>2‘ 字扩展法</h3><p>字扩展法，对存储单元的数量进行扩展，适用于CPU的地址线数量大于存储芯片的地址线位数，高位作为片选信号。</p>
+<h3 id="3‘-字位扩展法"><a href="#3‘-字位扩展法" class="headerlink" title="3‘ 字位扩展法"></a>3‘ 字位扩展法</h3><p>结合字扩展法和位扩展法</p>
+<h2 id="6-主存储器与CPU的连接"><a href="#6-主存储器与CPU的连接" class="headerlink" title="6.主存储器与CPU的连接"></a>6.主存储器与CPU的连接</h2><p>主要需要考虑以下几个方面：</p>
+<ul>
+<li>地址线</li>
+<li>数据线</li>
+<li>读写命令线</li>
+<li>片选线（线选法，还有利用译码器来进行片选的方式）</li>
+</ul>
+<p>另外还需要考虑选择合适的存储芯片：</p>
+<ul>
+<li>ROM：存放系统程序、标准子程序和各类常数</li>
+<li>RAM：用户编程</li>
+</ul>
+<h1 id="四、外存（辅存）"><a href="#四、外存（辅存）" class="headerlink" title="四、外存（辅存）"></a>四、外存（辅存）</h1><p>磁表面存储器——磁性材料作为载体，每次读写都是1bit，且<strong>读写不可同时进行</strong>【<strong>串行</strong>】；如：磁盘、磁带、磁鼓等。</p>
+<p><strong>优点</strong></p>
+<ul>
+<li>存储容量大，位价格低</li>
+<li>记录介质可重复使用</li>
+<li>记录信息可长期保存而不丢失，可脱机存档</li>
+<li>非破坏性读出</li>
+</ul>
+<p><strong>缺点</strong></p>
+<ul>
+<li>存取速度慢</li>
+<li>机械结构复杂</li>
+<li>工作环境要求高</li>
+</ul>
+<h2 id="1-磁盘存储器"><a href="#1-磁盘存储器" class="headerlink" title="1.磁盘存储器"></a>1.磁盘存储器</h2><blockquote>
+<p>省流总结：每一条磁道上的存储容量相同，即外圈和内圈的容量是一致的，因此磁盘的存储容量受限于最内圈的最大记录数。</p>
+</blockquote>
+<p>磁盘存储器=磁盘驱动器+磁盘控制器+盘片</p>
+<p><img src="/2024/08/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%89-%EF%BC%9A%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/image-20240827100206654.png" alt="image-20240827100206654"></p>
+<p>关于存储区域的一些基本概念：</p>
+<ul>
+<li>磁头数：记录面数，盘片两面均可作为记录面</li>
+<li>柱面数：实际上就是一个盘片上面的磁道数，因为实际的磁盘是由多个盘片组成的，相同的磁道形成一个柱面</li>
+<li>扇区数：扇区又称块，表示每个磁道被分为多少个部分，扇区是依靠圆心角划分的，因此内外圈磁道的扇区数相同，并且每一个扇区内的磁道其存储位数相同</li>
+</ul>
+<p><strong>磁盘地址结构    |驱动器号|柱面号（磁道号）|盘面号（磁头号）|扇区号（块号）|</strong></p>
+<blockquote>
+<p>实际上就是磁盘的一个工作流程，磁盘是怎么取到我们最终想要的数据的一个过程——从宏观到微观（不严谨描述）</p>
+</blockquote>
+<p><strong>磁盘的性能指标</strong></p>
+<blockquote>
+<p>提到性能就是两个角度：时间和空间</p>
+</blockquote>
+<ul>
+<li><p>记录密度</p>
+<blockquote>
+<p>密度：单位空间内的某个物质成分含量</p>
+</blockquote>
+<ul>
+<li>位密度：磁道单位长度上能够记录的二进制数据位数</li>
+<li>道密度：磁盘半径方向单位长度上的磁道数</li>
+<li>面密度：位密度和道密度的乘积</li>
+</ul>
+</li>
+<li><p>容量</p>
+<blockquote>
+<p>商家和用户的错位</p>
+<p>商家宣传的容量——非格式化容量</p>
+<p>用户手上实际的容量——格式化容量</p>
+</blockquote>
+<ul>
+<li><p>非格式化容量：磁记录表面可利用的的磁化单元总数</p>
+<script type="math/tex; mode=display">
+非格式化容量=记录面数\times磁道数\times每条磁道上的磁化单元数</script></li>
+<li><p>格式化容量：按照某种记录格式所能存储的信息总量</p>
+<script type="math/tex; mode=display">
+格式化容量=记录面数\times磁道数\times扇区数\times扇区容量</script></li>
+</ul>
+</li>
+<li><p><strong>存取时间=寻道时间（磁头移动到目的磁道的时间）+旋转延迟时间（磁头定位到目的扇区的时间）+传输时间（数据传输时间）</strong></p>
+<p>由于寻道远近和扇区远近不同，因此取平均值：即一半</p>
+</li>
+<li><p>数据传输速率：单位时间内磁盘存储器向主机传输数据的<strong>字节数</strong></p>
+</li>
+</ul>
+<p><strong>独立冗余磁盘阵列（RAID）</strong>——存储性能、可靠性和安全性</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>分级</th>
+<th>技术</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RAID0</td>
+<td>无冗余、无校验，条带化技术——并行读写：将连续的数据块交替存放在不同的物理磁盘扇区中；<strong>注意：无容错能力</strong></td>
+</tr>
+<tr>
+<td>RAID1</td>
+<td>镜像磁盘阵列——两个磁盘互为备份</td>
+</tr>
+<tr>
+<td>RAID2</td>
+<td>纠错的海明码</td>
+</tr>
+<tr>
+<td>RAID3</td>
+<td>位交叉奇偶校验</td>
+</tr>
+<tr>
+<td>RAID4</td>
+<td>块交叉奇偶校验</td>
+</tr>
+<tr>
+<td>RAID5</td>
+<td>无独立校验的奇偶校验</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>技术</th>
+<th>目的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>多个磁盘</td>
+<td>提高传输速率</td>
+</tr>
+<tr>
+<td>并行存取</td>
+<td>提高吞吐量</td>
+</tr>
+<tr>
+<td>镜像</td>
+<td>安全可靠</td>
+</tr>
+<tr>
+<td>数据校验</td>
+<td>容错</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2 id="2-固态硬盘（SSD）"><a href="#2-固态硬盘（SSD）" class="headerlink" title="2.固态硬盘（SSD）"></a>2.固态硬盘（SSD）</h2><p>固态硬盘基于闪存技术（EEPROM），也就是说它是ROM；与传统机械硬盘的对应关系：</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>磁盘</th>
+<th>SSD</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>磁盘驱动器</td>
+<td>闪存芯片</td>
+</tr>
+<tr>
+<td>磁盘控制器</td>
+<td>闪存翻译层（负责翻译逻辑块号，找到对应的页）</td>
+</tr>
+<tr>
+<td>盘片（磁表面存储器）</td>
+<td>闪存（EEPROM）</td>
+</tr>
+<tr>
+<td>磁道</td>
+<td>块</td>
+</tr>
+<tr>
+<td>扇区</td>
+<td>页</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>磁盘是以扇区为单位进行读写操作的，而SSD是以页为单位进行读写操作的。对于SSD而言，以块为单位进行擦除，擦干净的块中每页都可以进行一次写入，无限次读出。</p>
+<p><strong>优点</strong></p>
+<ul>
+<li>随机访问（注意：磁盘是直接存取存取器，结合顺序存取存储器和随机存储器的特点）</li>
+<li>无机械噪声和振动</li>
+<li>能耗低</li>
+<li>抗震性好</li>
+<li>安全性高</li>
+</ul>
+<p><strong>磨损均衡</strong></p>
+<p>引入原因：部分闪存芯片的损坏会导致整个SSD损坏</p>
+<p>思想：让被擦除次数较多的存储块承担更多读操作</p>
+<p>分类</p>
+<ul>
+<li>动态磨损均衡：写入数据时选择更新的块</li>
+<li>静态磨损均衡：SSD监测并自动分配【更先进】</li>
+</ul>
+<h1 id="五、高速缓冲存储器——Cache"><a href="#五、高速缓冲存储器——Cache" class="headerlink" title="五、高速缓冲存储器——Cache"></a>五、高速缓冲存储器——Cache</h1><h2 id="1-局部性原理"><a href="#1-局部性原理" class="headerlink" title="1.局部性原理"></a>1.局部性原理</h2><blockquote>
+<p>局部性原理与其说是一个程序的原理，不如说程序员在早期编程经验中总结出来的一条经验规律，然后“传承”给后来的程序员并且要求他们遵守；或者说算是编程标准化。</p>
+</blockquote>
+<p><strong>时间局部性</strong>    近期使用的数据可能马上还要用</p>
+<p><strong>空间局部性</strong>    近期使用的数据附近的数据可能马上要用</p>
+<h2 id="2-Cache基本概念"><a href="#2-Cache基本概念" class="headerlink" title="2.Cache基本概念"></a>2.Cache基本概念</h2><p>Cache即为高速缓冲存储器，其存在的目的是解决CPU和内存的速度矛盾；其缓冲的思路正是局部性原理，在此基础上我们有以下问题：</p>
+<ul>
+<li>Cache与内存之间的映射关系</li>
+<li>Cache替换策略</li>
+<li>Cache与内存内容的一致性问题</li>
+</ul>
+<p><img src="/2024/08/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%89-%EF%BC%9A%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/image-20240827164730587.png" alt="image-20240827164730587"></p>
+<p><strong>Cache块</strong>    也称<strong>Cache行</strong></p>
+<p><strong>命中</strong>    若CPU要访问的数据能够直接从Cache中获取则称命中，否则为未命中</p>
+<p><strong>命中率</strong>    CPU将要访问的数据已经在Cache中的比例</p>
+<p><strong>主存块</strong>    也称<strong>页、页框、页面</strong></p>
+<p><strong>访问策略</strong></p>
+<ul>
+<li><p>同时访问：即同时访问Cache和内存，此时平均访问时间为</p>
+<script type="math/tex; mode=display">
+T_a=Ht_c+(1-H)t_m</script><p>$H$为命中率，$t_c$为访问Cache的时间，$t_m$为访问内存的时间</p>
+</li>
+<li><p>依次访问：即先访问Cache，若未命中再访问内存，此时平均访问时间为</p>
+<script type="math/tex; mode=display">
+T_a=Ht_c+(1-H)(t_c+t_m)</script><p>$H$为命中率，$t_c$为访问Cache的时间，$t_m$为访问内存的时间</p>
+</li>
+</ul>
+<h2 id="3-Cache和主存（内存）的映射方式"><a href="#3-Cache和主存（内存）的映射方式" class="headerlink" title="3.Cache和主存（内存）的映射方式"></a>3.Cache和主存（内存）的映射方式</h2><p><strong>第一个问题：Cache与内存之间的映射关系</strong></p>
+<p>这个问题的产生原因是Cache是由SRAM构成的，而SRAM的成本较高，因此Cache的容量必然远远小于内存，这也很容易理解，如果成本一样容量一样，那直接作为内存岂不美哉？存储器层次结构也就没有必要存在了，说到底还是一个<strong>TRADE-OFF</strong>。</p>
+<p>Cache中的内容是主存的副本，那么我们需要有<strong>标记位</strong>来标记Cache中的内容对应的是主存中的哪一个地址中的内容，同时我们还需要一个<strong>有效位</strong>来标记Cache行中内容是否有效。</p>
+<blockquote>
+<p><strong>注意</strong>：</p>
+<p><strong>主存块大小=Cache块大小</strong>，因为Cache与主存之间的数据交换是以<strong>块</strong>为单位的；另外CPU与主存或Cache的数据交换是以<strong>字</strong>为单位的。</p>
+</blockquote>
+<p><img src="/2024/08/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%89-%EF%BC%9A%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/image-20240827192013788.png" alt="image-20240827192013788"></p>
+<h3 id="1‘-直接映射（直相联）"><a href="#1‘-直接映射（直相联）" class="headerlink" title="1‘ 直接映射（直相联）"></a>1‘ 直接映射（直相联）</h3><p>主存中的每一块只能装入Cache中的唯一位置，若该位置已有内容，则发生冲突，原先的内容将会被无条件替换。关系式</p>
+<script type="math/tex; mode=display">
+Cache块号（行号）=主存块号\ mod\ Cache块数（总行数）</script><p>由于无论是内存还是Cache的硬件设计要求其容量均为2的整数次幂，实际上我们可以根据地址结构来直接获得我们想要的信息。</p>
+<p>假设主存地址空间大小（容量）为$2^nB$，按字节（$1B=8bits$）编址，同时将其分为$2^m$块，Cache总行数为$2^c$，那么有以下结构：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">+------------------------------+--------------------+</span><br><span class="line">+          主存块号 m位          +   块内地址 (n-m)位   +</span><br><span class="line">+------------------------------+--------------------+</span><br><span class="line">+  标记 (m-c)位  + Cache块号 c位 +   块内地址 (n-m)位   +</span><br><span class="line">+------------------------------+--------------------+</span><br></pre></td></tr></table></figure>
+<h3 id="2‘-全相联映射"><a href="#2‘-全相联映射" class="headerlink" title="2‘ 全相联映射"></a>2‘ 全相联映射</h3><p>主存中的每一块只能装入Cache中的任一位置，有以下结构：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">+------------------------------+--------------------+</span><br><span class="line">+          主存块号 m位          +   块内地址 (n-m)位   +</span><br><span class="line">+------------------------------+--------------------+</span><br><span class="line">+            标记 m位           +   块内地址 (n-m)位   +</span><br><span class="line">+------------------------------+--------------------+</span><br></pre></td></tr></table></figure>
+<p>全相联映射<strong>优点</strong></p>
+<ul>
+<li>Cache的冲突概率低，只要存在空闲的Cache就不会发生冲突</li>
+<li>空间利用率高</li>
+<li>命中率高</li>
+</ul>
+<p><strong>缺点</strong></p>
+<ul>
+<li>标记的比较速度慢，目标地址的高$m$位(即$log_2主存块数$)需要与Cache每一行的标记比较</li>
+<li>实现成本高，通常需要借用相联存储器（既可以按照地址寻址，也可以按照内容寻址）</li>
+</ul>
+<h3 id="3‘-组相联映射"><a href="#3‘-组相联映射" class="headerlink" title="3‘ 组相联映射"></a>3‘ 组相联映射</h3><p>将Cache分成大小相同的$Q$组，即$Q=\frac{Cache总行数}{一组中Cache的行数}$，主存中的每一块可以放入固定组中的任意一行，即<strong>组间直接映射，组内全相联映射</strong>，关系式</p>
+<script type="math/tex; mode=display">
+Cache组号=主存块号\ mod\ Cache组数</script><p>由于无论是内存还是Cache的硬件设计要求其容量均为2的整数次幂，实际上我们可以根据地址结构来直接获得我们想要的信息。</p>
+<p>假设主存地址空间大小（容量）为$2^nB$，按字节（$1B=8bits$）编址，同时将其分为$2^m$块，Cache组数为$2^q$，那么有以下结构：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">+------------------------------+--------------------+</span><br><span class="line">+          主存块号 m位          +   块内地址 (n-m)位   +</span><br><span class="line">+------------------------------+--------------------+</span><br><span class="line">+  标记 (m-q)位  + Cache组号 q位 +   块内地址 (n-m)位   +</span><br><span class="line">+------------------------------+--------------------+</span><br></pre></td></tr></table></figure>
+<p>当$Q=1$时，组相联映射实际上就是全相联映射；当$Q=Cache总行数$时，组相联映射实际上就是直接相联映射，因此组相联映射是<strong>TRADE-OFF</strong>的产物，即直接映射和全相联映射的折中。</p>
+<p><strong>对于组相联映射，每组中有$\mathbf{r}$个Cache行则称该映射为$\mathbf{r}$路组相联映射。</strong></p>
+<p><strong>小结</strong></p>
+<ol>
+<li>直接映射的命中率最低，全相联映射的命中率最高</li>
+<li>直接映射的判断开销最小、耗时最短，全相联映射的判断开销最大、耗时最长</li>
+<li>直接映射的标记位占额外空间开销最小，全相联映射的标记位占额外空间开销最大</li>
+</ol>
+<h2 id="4-Cache替换算法"><a href="#4-Cache替换算法" class="headerlink" title="4.Cache替换算法"></a>4.Cache替换算法</h2><blockquote>
+<p>可参考OS中的页替换算法</p>
+</blockquote>
+<p><strong>注意</strong>    只有全相联映射和组相联映射需要替换算法，因为对于直接映射而言，发生冲突的时候不需要考虑直接替换即可。</p>
+<ul>
+<li>RAND算法（随机算法）：随机替换，毫无规律，实现简单，效果不稳定【未考虑局部性原理】</li>
+<li>FIFO算法（先进先出算法）：同样未考虑局部性原理</li>
+<li>LRU算法（最近最少使用算法）：即将最近最少使用的Cache块替换出去，实现上是借助一个计数器（也称LRU替换位）来记录主存块的使用情况，具体的计数规律如下：<ul>
+<li>命中，命中行计数器清零，小于该数的计数器+1</li>
+<li>未命中且还有空闲行，新装入行计数器置0，其余+1</li>
+<li>未命中且没有空闲行，替换行计数器清零，其余+1</li>
+</ul>
+</li>
+<li>LFU算法（最不经常使用算法）：将一段时间内访问次数最少的Cache块替换出去，同样使用计数器</li>
+</ul>
+<p><strong>抖动</strong>    频繁的换入换出现象——刚换出的块很快又被调入</p>
+<h2 id="5-Cache一致性问题"><a href="#5-Cache一致性问题" class="headerlink" title="5.Cache一致性问题"></a>5.Cache一致性问题</h2><p><strong>问题原因</strong>    Cache与主存不是相割裂的存在，Cache中的内容本质上是主存的一个副本。我们的CPU优先会在这个副本上进行操作，因为快；但是这就导致了一个问题，我们有可能只修改了Cache中的内容，但是还未改变主存中的内容。从我们的描述中很容易发现这个<strong>一致性问题出现在写操作当中</strong>。</p>
+<blockquote>
+<p>计组这里好像考的没有那么深入，记得体系结构课程中好像还有更复杂一些的东西，如果后续有时间或者我遇到了相关的题，我再回来更新。</p>
+</blockquote>
+<p><strong>写操作命中</strong>    即在进行写操作时，Cache块中有我们要更新的内容副本，此时我们很容易有两种思路：</p>
+<ul>
+<li><p>同时更新Cache和主存，保证两者内容时刻一致，即<strong>全写法（直写法，write-through）</strong>。</p>
+<blockquote>
+<p>似乎还有将其称为<strong>写穿透、写直达、写直通</strong>的</p>
+</blockquote>
+<p>采用这个方法的同时我们可以使用<strong>写缓冲（先进先出的队列、SRAM）</strong>来平衡速度不匹配的问题。</p>
+</li>
+<li><p>先更新Cache中的内容，在这一个Cache行被替换时，写回主存，即<strong>回写法（写回法，write-back）</strong>。该方法减少了访存次数，同时为了标记一致性，给Cache行增添一个<strong>修改位（脏位）</strong></p>
+</li>
+</ul>
+<p><strong>写操作未命中</strong>    这个时候很显然我们是直接修改主存，但是我们仍然有两个思路，这是针对于修改后的主存块是否装入Cache的考虑：</p>
+<ul>
+<li><strong>写分配法（write-allocate）</strong>    更新主存，并将更新块调入Cache，试图利用空间局部性。</li>
+<li><strong>非写分配法（not-write-allocate）</strong>    仅更新主存，不调入。</li>
+</ul>
+<p><strong>分离指令Cache和数据Cache、多级Cache</strong></p>
+<h1 id="六、虚拟存储器"><a href="#六、虚拟存储器" class="headerlink" title="六、虚拟存储器"></a>六、虚拟存储器</h1><blockquote>
+<p>结合OS</p>
+</blockquote>
+
+    </div>
+
+
+<div>
+  
+    <div>
+  
+    <div style="text-align:center;color: #7e0c6e;font-size:18px;">本文到此结束，欢迎邮件交流：3143935826@qq.com <i class="fa fa-paw"></i> ฅ&gt;ω&lt;*ฅ</div>
+  
+</div>
+
+  
+</div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%80%83%E7%A0%94/" rel="tag"># 考研</a>
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" rel="tag"># 计算机组成原理</a>
+              <a href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag"># 笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/07/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%8C-%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E8%BF%90%E7%AE%97/" rel="prev" title="计算机组成原理(二)：数据的表示和运算">
+      <i class="fa fa-chevron-left"></i> 计算机组成原理(二)：数据的表示和运算
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%BC%95%E8%A8%80"><span class="nav-text">一、引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%AD%98%E5%82%A8%E5%99%A8%E7%9A%84%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84"><span class="nav-text">二、存储器的层次结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E6%8C%87%E6%A0%87"><span class="nav-text">性能指标</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E4%B8%BB%E5%AD%98%E5%82%A8%E5%99%A8"><span class="nav-text">三、主存储器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-SRAM%E8%8A%AF%E7%89%87%E5%92%8CDRAM%E8%8A%AF%E7%89%87"><span class="nav-text">1.SRAM芯片和DRAM芯片</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%8F%AA%E8%AF%BB%E5%AD%98%E5%82%A8%E5%99%A8"><span class="nav-text">2.只读存储器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E4%B8%BB%E5%AD%98%E5%82%A8%E5%99%A8%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-text">3.主存储器的结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%8F%8C%E7%AB%AF%E5%8F%A3RAM%E5%92%8C%E5%A4%9A%E6%A8%A1%E5%9D%97%E5%AD%98%E5%82%A8%E5%99%A8"><span class="nav-text">4.双端口RAM和多模块存储器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E2%80%98-%E5%8F%8C%E7%AB%AF%E5%8F%A3RAM"><span class="nav-text">1‘ 双端口RAM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E2%80%98-%E5%8D%95%E4%BD%93%E5%A4%9A%E5%AD%97%E5%AD%98%E5%82%A8%E5%99%A8"><span class="nav-text">2‘ 单体多字存储器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E2%80%98-%E5%A4%9A%E4%BD%93%E5%B9%B6%E8%A1%8C%E5%AD%98%E5%82%A8%E5%99%A8"><span class="nav-text">3‘ 多体并行存储器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E4%B8%BB%E5%AD%98%E5%82%A8%E5%99%A8%E5%AE%B9%E9%87%8F%E7%9A%84%E6%89%A9%E5%B1%95"><span class="nav-text">5.主存储器容量的扩展</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E2%80%98-%E4%BD%8D%E6%89%A9%E5%B1%95%E6%B3%95"><span class="nav-text">1‘ 位扩展法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E2%80%98-%E5%AD%97%E6%89%A9%E5%B1%95%E6%B3%95"><span class="nav-text">2‘ 字扩展法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E2%80%98-%E5%AD%97%E4%BD%8D%E6%89%A9%E5%B1%95%E6%B3%95"><span class="nav-text">3‘ 字位扩展法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E4%B8%BB%E5%AD%98%E5%82%A8%E5%99%A8%E4%B8%8ECPU%E7%9A%84%E8%BF%9E%E6%8E%A5"><span class="nav-text">6.主存储器与CPU的连接</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%A4%96%E5%AD%98%EF%BC%88%E8%BE%85%E5%AD%98%EF%BC%89"><span class="nav-text">四、外存（辅存）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E7%A3%81%E7%9B%98%E5%AD%98%E5%82%A8%E5%99%A8"><span class="nav-text">1.磁盘存储器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%9B%BA%E6%80%81%E7%A1%AC%E7%9B%98%EF%BC%88SSD%EF%BC%89"><span class="nav-text">2.固态硬盘（SSD）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E9%AB%98%E9%80%9F%E7%BC%93%E5%86%B2%E5%AD%98%E5%82%A8%E5%99%A8%E2%80%94%E2%80%94Cache"><span class="nav-text">五、高速缓冲存储器——Cache</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%B1%80%E9%83%A8%E6%80%A7%E5%8E%9F%E7%90%86"><span class="nav-text">1.局部性原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Cache%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-text">2.Cache基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Cache%E5%92%8C%E4%B8%BB%E5%AD%98%EF%BC%88%E5%86%85%E5%AD%98%EF%BC%89%E7%9A%84%E6%98%A0%E5%B0%84%E6%96%B9%E5%BC%8F"><span class="nav-text">3.Cache和主存（内存）的映射方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E2%80%98-%E7%9B%B4%E6%8E%A5%E6%98%A0%E5%B0%84%EF%BC%88%E7%9B%B4%E7%9B%B8%E8%81%94%EF%BC%89"><span class="nav-text">1‘ 直接映射（直相联）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E2%80%98-%E5%85%A8%E7%9B%B8%E8%81%94%E6%98%A0%E5%B0%84"><span class="nav-text">2‘ 全相联映射</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E2%80%98-%E7%BB%84%E7%9B%B8%E8%81%94%E6%98%A0%E5%B0%84"><span class="nav-text">3‘ 组相联映射</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-Cache%E6%9B%BF%E6%8D%A2%E7%AE%97%E6%B3%95"><span class="nav-text">4.Cache替换算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-Cache%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98"><span class="nav-text">5.Cache一致性问题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E8%99%9A%E6%8B%9F%E5%AD%98%E5%82%A8%E5%99%A8"><span class="nav-text">六、虚拟存储器</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Yuzhao Peng"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Yuzhao Peng</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yuzhao-peng" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yuzhao-peng" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yuzhao Peng</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">15k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">14 分钟</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
