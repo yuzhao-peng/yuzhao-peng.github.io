@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="一、引言终于结束了很长的一章，上一章的Cache相关的知识点值得我们再好好思考一番，在这里我再略作补充： Cache地址——除去标记位的主存地址">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机组成原理(四)：指令系统">
+<meta property="og:url" content="http://example.com/2024/08/31/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%9B%9B-%EF%BC%9A%E6%8C%87%E4%BB%A4%E7%B3%BB%E7%BB%9F/index.html">
+<meta property="og:site_name" content="Yuzhao&#39;s Blog">
+<meta property="og:description" content="一、引言终于结束了很长的一章，上一章的Cache相关的知识点值得我们再好好思考一番，在这里我再略作补充： Cache地址——除去标记位的主存地址">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2024/08/31/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%9B%9B-%EF%BC%9A%E6%8C%87%E4%BB%A4%E7%B3%BB%E7%BB%9F/image-20240829221814173.png">
+<meta property="og:image" content="http://example.com/2024/08/31/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%9B%9B-%EF%BC%9A%E6%8C%87%E4%BB%A4%E7%B3%BB%E7%BB%9F/image-20240829222108179.png">
+<meta property="og:image" content="http://example.com/2024/08/31/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%9B%9B-%EF%BC%9A%E6%8C%87%E4%BB%A4%E7%B3%BB%E7%BB%9F/image-20240831101609129.png">
+<meta property="article:published_time" content="2024-08-31T02:44:23.000Z">
+<meta property="article:modified_time" content="2024-08-31T02:45:43.356Z">
+<meta property="article:author" content="Yuzhao Peng">
+<meta property="article:tag" content="考研">
+<meta property="article:tag" content="计算机组成原理">
+<meta property="article:tag" content="笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/08/31/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%9B%9B-%EF%BC%9A%E6%8C%87%E4%BB%A4%E7%B3%BB%E7%BB%9F/image-20240829221814173.png">
+
+<link rel="canonical" href="http://example.com/2024/08/31/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%9B%9B-%EF%BC%9A%E6%8C%87%E4%BB%A4%E7%B3%BB%E7%BB%9F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>计算机组成原理(四)：指令系统 | Yuzhao's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Yuzhao's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/08/31/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%9B%9B-%EF%BC%9A%E6%8C%87%E4%BB%A4%E7%B3%BB%E7%BB%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Yuzhao Peng">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yuzhao's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          计算机组成原理(四)：指令系统
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-08-31 10:44:23 / 修改时间：10:45:43" itemprop="dateCreated datePublished" datetime="2024-08-31T10:44:23+08:00">2024-08-31</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%80%83%E7%A0%94/" itemprop="url" rel="index"><span itemprop="name">考研</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%80%83%E7%A0%94/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="一、引言"><a href="#一、引言" class="headerlink" title="一、引言"></a>一、引言</h1><p>终于结束了很长的一章，上一章的Cache相关的知识点值得我们再好好思考一番，在这里我再略作补充：</p>
+<p>Cache地址——除去标记位的主存地址</p>
+<span id="more"></span>
+<h1 id="二、指令格式"><a href="#二、指令格式" class="headerlink" title="二、指令格式"></a>二、指令格式</h1><p>指令是计算机运行的最小功能单位，而一台计算机的所有指令构成该计算机的指令系统，也称为<strong>指令集</strong>【对于指令集的具体设计是计算机体系结构中的任务——指令集基于体系结构】。指令集体系结构（ISA）完整的定义了软件和硬件之间的接口：</p>
+<ul>
+<li>指令格式、指令寻址方式、操作类型、操作数</li>
+<li>操作数类型、操作数寻址方式、大端序or小端序</li>
+<li>程序可访问的寄存器编号、个数、大小（位数）等</li>
+<li>存储空间大小、编址方式</li>
+<li>控制信号</li>
+</ul>
+<p>指令，顾名思义就是让谁干什么，用专业的术语来说就是<strong>操作码</strong>、<strong>地址码</strong>，基本指令构成如下：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">+--------------------+--------------------+</span><br><span class="line">+        操作码       +        地址码       +</span><br><span class="line">+--------------------+--------------------+</span><br></pre></td></tr></table></figure>
+<p><strong>操作码</strong>    指示指令功能，识别指令、了解指令功能以及区分操作数地址内容的关键信息。</p>
+<p><strong>地址码</strong>    指示被操作信息（指令或数据）的地址，如：操作数地址、运算结果的保存地址、程序的转移地址、子程序入口地址等。</p>
+<p><strong>指令字长</strong>    构成指令的二进制数码的位数，与机器字长没有必然联系，一般取存储字长的整数倍。</p>
+<blockquote>
+<p><strong>机器字长</strong>    机器硬件设计规定的字长，决定取指令的存取周期；CPU进行一次整数运算能够处理的二进制数据的位数，与ALU之间相关</p>
+<ul>
+<li>位（Bit）：表示一个二进制数码0或1，是计算机存储处理信息的最基本的单位。</li>
+<li>字节（Byte）：一个字节由8个位组成 。</li>
+<li>字（Word）：在X86机器中16个位为一个字（即两个字节是一个字）。</li>
+</ul>
+<p><strong>存储字长</strong>    一个存储单元存储的二进制数码的位数。</p>
+</blockquote>
+<h2 id="1-按照地址码数目分类"><a href="#1-按照地址码数目分类" class="headerlink" title="1.按照地址码数目分类"></a>1.按照地址码数目分类</h2><p><strong>零地址指令</strong>    没有显式的地址码；两种可能：（1）无需操作数的指令，如：空操作指令、停机指令、关中断指令等；（2）堆栈计算机中的运算类型指令，其操作数隐式存放在栈顶和次栈顶，运算结果压入栈顶。</p>
+<p><strong>一地址指令</strong>    与上一种情况类似。</p>
+<p><strong>二地址指令</strong>    访存次数：取指令1次+取两个操作数2次+写结果1次【共4次】</p>
+<p><strong>三地址指令</strong>    访存次数：取指令1次+取两个操作数2次+写结果1次【共4次】</p>
+<p><strong>四地址指令</strong>    访存次数：取指令1次+取两个操作数2次+写结果1次【共4次】值得注意的是，第四个地址一般为下一条指令的地址</p>
+<h2 id="2-按照指令长度分类"><a href="#2-按照指令长度分类" class="headerlink" title="2.按照指令长度分类"></a>2.按照指令长度分类</h2><p><strong>定长指令字结构</strong></p>
+<p><strong>变长指令字结构</strong></p>
+<h2 id="3-按照操作码长度分类"><a href="#3-按照操作码长度分类" class="headerlink" title="3.按照操作码长度分类"></a>3.按照操作码长度分类</h2><p><strong>定长操作码指令格式</strong></p>
+<p><strong>可变长操作码指令格式</strong></p>
+<blockquote>
+<p><strong>小总结</strong>    上述两种分类方式，对于定长格式而言，其硬件设计较简单，执行速度较快，但是灵活性差</p>
+</blockquote>
+<h2 id="4-扩展操作码指令格式"><a href="#4-扩展操作码指令格式" class="headerlink" title="4.扩展操作码指令格式"></a>4.扩展操作码指令格式</h2><p><strong>可变长操作码的定长指令字结构</strong></p>
+<ul>
+<li>前缀编码：短码不能是长码的前缀</li>
+<li>指令操作码不能重复</li>
+</ul>
+<p>一般而言，使用频率较高的指令分配较短的操作码，以减少指令译码分析的开销。</p>
+<h2 id="5-按照操作类型分类"><a href="#5-按照操作类型分类" class="headerlink" title="5.按照操作类型分类"></a>5.按照操作类型分类</h2><p><strong>数据传送</strong>    LOAD（源：存储器；目的：寄存器）、STORE（源：寄存器；目的：存储器）</p>
+<p><strong>算术和逻辑运算</strong></p>
+<ul>
+<li>算术：加（ADD）、减（SUB）、乘（MUL）、除（DIV）、自增1（INC）、自减1（DEC）、求补、浮点运算等</li>
+<li>逻辑：与（AND）、或（OR）、非（NOT）、异或（XOR）、位运算等</li>
+</ul>
+<p><strong>移位操作</strong>    算术移位、逻辑移位、循环移位</p>
+<p><strong>转移操作 </strong></p>
+<ul>
+<li>无条件转移（JMP）</li>
+<li>条件转移<ul>
+<li>JZ：结果为零转移</li>
+<li>JO：结果溢出转移</li>
+<li>JC：结果进位转移</li>
+</ul>
+</li>
+<li>调用（CALL）、返回（RET）</li>
+<li>陷阱（TRAP）</li>
+</ul>
+<blockquote>
+<p><strong>调用和和转移的区别</strong>：调用需要保存调用指令下一条指令的地址作为返回地址，待子程序执行结束后跳转到返回地址继续执行主程序。</p>
+</blockquote>
+<p><strong>输入输出操作</strong></p>
+<h1 id="三、指令寻址方式"><a href="#三、指令寻址方式" class="headerlink" title="三、指令寻址方式"></a>三、指令寻址方式</h1><h2 id="1-指令寻址"><a href="#1-指令寻址" class="headerlink" title="1.指令寻址"></a>1.指令寻址</h2><p><strong>关键</strong>    <strong>程序计数器（PC）</strong></p>
+<p><strong>寻址方式</strong>    顺序寻址、跳跃寻址</p>
+<p><strong>相关概念</strong>    指令字长、编址方式</p>
+<p>顺序寻址时，程序计数器加“1”，自动形成下一条指令的地址，这里的“1”是带引号的，因为它表示一条指令的指令长度，与编址方式、指令字长相关，指令长度=指令字长/编址长度。跳跃寻址分为两跳跃方式：一种是绝对转移，即地址码直接给出目标地址；另一种是相对转移，即地址码给出的是目标地址相对于当前PC值的偏移量。</p>
+<h2 id="2-数据寻址【重点：十种】"><a href="#2-数据寻址【重点：十种】" class="headerlink" title="2.数据寻址【重点：十种】"></a>2.数据寻址【重点：十种】</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">+--------------------+--------------------+--------------------+</span><br><span class="line">+        操作码       +       寻址特征      +        地址码       +</span><br><span class="line">+--------------------+--------------------+--------------------+</span><br></pre></td></tr></table></figure>
+<p>引入两个概念：<strong>形式地址（A）</strong>和<strong>有效地址（EA）</strong>，形式地址指的是指令中的地址码，而有效地址指的是真实的地址；另外引入一个表示符号<strong>(A)</strong>表示地址A的内容（数据）</p>
+<ul>
+<li><p>隐含寻址</p>
+<p>隐含操作数地址，将某一个操作数由特定的寄存器提供</p>
+<p><strong>优点</strong>    缩短指令字长</p>
+<p><strong>缺点</strong>    需要增加硬件（提供操作数或地址）</p>
+</li>
+<li><p>立即（数）寻址</p>
+<p>地址字段直接给出操作数（补码），称该操作数为立即数</p>
+<p><strong>优点</strong>    指令执行阶段无需访存，指令执行速度最快</p>
+<p><strong>缺点</strong>    地址码位数限制了立即数的取值范围</p>
+</li>
+<li><p>直接寻址</p>
+<p>地址字段给出的就是有效地址，即$EA=A$</p>
+<p><strong>优点</strong>    简单，无需计算操作数地址，指令执行阶段访存一次</p>
+<p><strong>缺点</strong>    地址码位数限制寻址范围</p>
+</li>
+<li><p>间接寻址</p>
+<p>地址字段给出有效地址所在的地址，即$EA=(A)$</p>
+<p><strong>优点</strong>    扩大寻址范围，现在的寻址范围受限于编址方式，便于编制程序（与程序调用的过程相适应）</p>
+<p><strong>缺点</strong>    需要多次访存，增加了时间开销（一次间接寻址需要2次访存）</p>
+</li>
+<li><p>寄存器寻址</p>
+<p>地址字段给出的是寄存器的编号，与直接寻址类似，即$EA=R_i$，操作数存放在$R_i$中</p>
+<p><strong>优点</strong>    指令执行阶段无需访存，只访问寄存器；由于寄存器数量较少，地址码位数较少，指令字长较短</p>
+<p><strong>缺点</strong>    寄存器成本高</p>
+</li>
+<li><p>寄存器间接寻址</p>
+<blockquote>
+<p>开始套娃</p>
+</blockquote>
+<p>地址字段给出寄存器编号，寄存器中存储的是操作数的地址，即$EA=((A))=(R_i)$</p>
+<p>相比于寄存器寻址，这种方法需要访存；相比于间接寻址，在保留间接寻址扩大寻址范围的基础上，还减少了访存次数</p>
+</li>
+<li><p>相对寻址</p>
+<p>属于偏移寻址类型，借助程序计数器（PC），即$EA=(PC)+A$，此时$PC$中的内容作为基址，地址字段的形式地址$A$作为偏移量，偏移量决定寻址范围</p>
+<p><strong>优点</strong>    操作数地址随PC值变化（不固定），但是与指令地址之间总是相差一个固定的偏移量，便于程序浮动</p>
+<p><strong>适用范围</strong>    转移指令</p>
+</li>
+<li><p>基址寻址</p>
+<p>属于偏移寻址类型，借助基址寄存器（BR），即$EA=(BR)+A$，此时$BR$中的内容作为基址，地址字段的形式地址$A$作为偏移量</p>
+<blockquote>
+<p>基址寄存器即OS中的重定位寄存器</p>
+</blockquote>
+<p><strong>优点</strong>    扩大寻址范围；用户只需要根据逻辑地址编程而不用关心自己的程序在物理空间上究竟如何存放，因此有利于多道程序设计，编制浮动程序</p>
+<p><strong>缺点</strong>    偏移量范围有限</p>
+<p><strong>注意</strong>    面向操作系统，程序员无法修改基址寄存器中的内容，其内容由操作系统或管理程序确定，解决逻辑地址与物理地址的关系问题</p>
+</li>
+<li><p>变址寻址</p>
+<p>属于偏移寻址类型，借助变址寄存器（IX），即$EA=(IX)+A$，此时地址字段的形式地址$A$作为基址，$IX$中的内容作为偏移量</p>
+<p><strong>优点</strong>    扩大寻址范围；偏移量范围可表示整个存储空间</p>
+<p><strong>适用范围</strong>    循环程序</p>
+<p><strong>注意</strong>    面向用户（程序员），用户可以改变变址寄存器中的内容</p>
+<p>|          | 基址寻址                     | 变址寻址                     |<br>| ———— | —————————————— | —————————————— |<br>| 基地址   | 基址寄存器中的内容           | 指令中的地址字段（形式地址） |<br>| 偏移量   | 指令中的地址字段（形式地址） | 变址寄存器中的内容           |<br>| 适用范围 | 多道程序、数据分配存储空间   | 数组问题、循环程序           |<br>| 面向对象 | 操作系统                     | 程序员                       |</p>
+</li>
+<li><p>堆栈寻址</p>
+<ul>
+<li>硬堆栈：借助寄存器</li>
+<li>软堆栈：主存中开辟一段地址空间</li>
+</ul>
+<p>堆栈指针（SP）：指示栈顶元素的地址</p>
+</li>
+</ul>
+<p><strong>数据寻址总结</strong></p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>寻址方式</th>
+<th>有效地址</th>
+<th>访存次数</th>
+<th>适用情况</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>隐含寻址</td>
+<td></td>
+<td>0</td>
+<td></td>
+</tr>
+<tr>
+<td>直接寻址</td>
+<td>$EA=A$</td>
+<td>1</td>
+<td>相对于立即寻址缩短了指令长度（对于超长数据而言）</td>
+</tr>
+<tr>
+<td>立即（数）寻址</td>
+<td>$A$就是操作数本身</td>
+<td>0</td>
+<td>寄存器赋初值</td>
+</tr>
+<tr>
+<td>一次间接寻址</td>
+<td>$EA=(A)$</td>
+<td>2</td>
+<td>扩大了寻址范围，易于完成子程序返回</td>
+</tr>
+<tr>
+<td>寄存器寻址</td>
+<td>$EA=R_i$</td>
+<td>0</td>
+<td>指令字较短，指令执行速度较快</td>
+</tr>
+<tr>
+<td>寄存器一次间接寻址</td>
+<td>$EA=((A))=(R_i)$</td>
+<td>1</td>
+<td>扩大寻址范围并相对于间接寻址减少访存次数</td>
+</tr>
+<tr>
+<td>相对寻址</td>
+<td>$EA=(PC)+A$</td>
+<td>1</td>
+<td>控制程序执行顺序、转移</td>
+</tr>
+<tr>
+<td>基址寻址</td>
+<td>$EA=(BR)+A$</td>
+<td>1</td>
+<td>对比变址寻址</td>
+</tr>
+<tr>
+<td>变址寻址</td>
+<td>$EA=A+(IX)$</td>
+<td>1</td>
+<td>对比基址寻址</td>
+</tr>
+<tr>
+<td>堆栈寻址</td>
+<td></td>
+<td>硬堆栈：0；软堆栈：1</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h1 id="四、机器级代码——汇编"><a href="#四、机器级代码——汇编" class="headerlink" title="四、机器级代码——汇编"></a>四、机器级代码——汇编</h1><blockquote>
+<p><strong>X86汇编指令</strong></p>
+</blockquote>
+<p><strong>向后兼容</strong></p>
+<p><img src="/2024/08/31/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%9B%9B-%EF%BC%9A%E6%8C%87%E4%BB%A4%E7%B3%BB%E7%BB%9F/image-20240829221814173.png" alt="image-20240829221814173"></p>
+<p>X表示一种未知代号，也就是说前四个为<strong>通用寄存器</strong>，中间两个为<strong>变址寄存器</strong>（I=Index，S=Source，D=Destination）EBP和ESP分别为堆栈基指针、堆栈顶指针。</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>AT&amp;T格式</th>
+<th>Intel格式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>指令字母小写</td>
+<td>指令字母大写</td>
+</tr>
+<tr>
+<td>源操作数在左，目的操作数在右</td>
+<td>源操作数在左，目的操作数在左</td>
+</tr>
+<tr>
+<td><strong>寄存器和立即数的前缀：“%”、“$”</strong></td>
+<td><strong>无前缀</strong></td>
+</tr>
+<tr>
+<td>内存寻址圆括号——“(”、“)”</td>
+<td>内存寻址方括号——“[”、“]”</td>
+</tr>
+<tr>
+<td>复杂寻址：偏移量(基址寄存器，变址寄存器，比例因子)</td>
+<td>复杂寻址：[基址寄存器+变址寄存器*比例因子+偏移量]</td>
+</tr>
+<tr>
+<td>数据长度后缀：b-byte-8；w-word-16；l-long-32</td>
+<td>数据长度显式注明：数据长度+ptr</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><img src="/2024/08/31/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%9B%9B-%EF%BC%9A%E6%8C%87%E4%BB%A4%E7%B3%BB%E7%BB%9F/image-20240829222108179.png" alt="image-20240829222108179"></p>
+<p><strong>注意：</strong></p>
+<ul>
+<li>双操作数的指令不能都是内存，<em>mov指令不能直接从内存复制到内存</em></li>
+<li>栈增长方向与内存地址增长方向相反</li>
+<li>除法指令用到了隐含寻址，被除数在EDX：EAX中，商存在EAX，余数存在EDX</li>
+<li>在X86架构中，程序计数器PC（Program Counter）被称为IP寄存器（Instruction Pointer）</li>
+<li>转移指令同样使用<strong>标号</strong>锚定目标位置，有条件转移通常需要先执行比较指令</li>
+<li>函数的起始地址通常用函数名作为标号</li>
+<li>循环语句：条件转移指令或loop指令（ECX作为循环计数器，循环时自减，默认当ECX!=0的时候回到循环标记）</li>
+</ul>
+<p><strong>函数调用</strong></p>
+<ul>
+<li><p>函数调用栈</p>
+<p><img src="/2024/08/31/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%9B%9B-%EF%BC%9A%E6%8C%87%E4%BB%A4%E7%B3%BB%E7%BB%9F/image-20240831101609129.png" alt="image-20240831101609129"></p>
+<p><em>X86系统中，默认以4字节作为栈的操作单位</em></p>
+<p><strong>访问栈帧</strong></p>
+<ul>
+<li><p>push、pop指令——操作栈顶：push让栈顶指针ESP减4（字节），然后将数据压入栈；pop将数据弹出栈并写入pop后的地址中，然后让栈顶指针加4（字节）</p>
+</li>
+<li><p>mov指令——更为通用的移动操作，结合add和sub指令修改ESP的值</p>
+</li>
+</ul>
+<p><strong>切换栈帧</strong></p>
+<blockquote>
+<p>个人建议画图分析</p>
+</blockquote>
+<ul>
+<li>```assembly<br>push ebp    #保存旧栈帧的栈底指针<br>mov ebp,esp    #设置新栈帧的栈底指针<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- ```assembly</span><br><span class="line">  mov esp,ebp	#取出旧栈帧的栈底指针</span><br><span class="line">  pop ebp		#恢复旧栈帧的栈底指针</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>函数的栈帧（Stack Frame）：保存函数的局部变量和函数调用的相关信息</p>
+<ul>
+<li>栈帧的最底部——上一层栈帧的基址EBP旧值</li>
+<li>栈帧的最顶部——返回地址</li>
+<li>栈帧底部的区域——局部变量：越接近底部的变量其定义时间越晚；借助EBP访问</li>
+<li>栈帧顶部的区域——参数：越接近顶部的参数其位置在参数列表中越靠前；借助ESP访问</li>
+</ul>
+<p><em>GCC编译器会将每个栈帧大小设置为16B的整数倍。</em></p>
+</li>
+<li><p>call指令和ret指令分别为调用指令和返回指令</p>
+<ul>
+<li>call指令：将IP（PC）的旧值压栈保存（在函数栈帧的顶部）；设置IP（PC）新值，无条件跳转至被调用函数的第一条指令</li>
+<li>ret指令：从函数栈帧的顶部返回旧的IP（PC）值，即使其出栈并恢复IP寄存器（PC）</li>
+</ul>
+</li>
+</ul>
+<h1 id="五、CISC-amp-RISC"><a href="#五、CISC-amp-RISC" class="headerlink" title="五、CISC&amp;RISC"></a>五、CISC&amp;RISC</h1><div class="table-container">
+<table>
+<thead>
+<tr>
+<th></th>
+<th>CISC</th>
+<th>RISC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>名称</td>
+<td>Complex Instruction Set Computer；复杂指令集计算机</td>
+<td>Reduced Instruction Set Computer；精简指令集计算机</td>
+</tr>
+<tr>
+<td>设计思想</td>
+<td>一个功能由一条指令完成</td>
+<td>一个功能由多条基本指令完成</td>
+</tr>
+<tr>
+<td>指令系统</td>
+<td>复杂，庞大</td>
+<td>简单，精简</td>
+</tr>
+<tr>
+<td>指令数目</td>
+<td>一般大于200条</td>
+<td>一般小于100条</td>
+</tr>
+<tr>
+<td>指令字长</td>
+<td>不固定，指令格式多，寻址方式多</td>
+<td>定长</td>
+</tr>
+<tr>
+<td>可访存指令</td>
+<td>不受限制</td>
+<td>LOAD、STORE【其余指令均在寄存器间进行】</td>
+</tr>
+<tr>
+<td>指令执行时间</td>
+<td>相差很大，大多数指令需要多个时钟周期</td>
+<td>绝大多数指令在一个时钟周期内完成</td>
+</tr>
+<tr>
+<td>指令使用频度</td>
+<td>相差很大</td>
+<td>-</td>
+</tr>
+<tr>
+<td>通用寄存器数量</td>
+<td>较少</td>
+<td>多</td>
+</tr>
+<tr>
+<td>目标代码</td>
+<td>难以用优化编译生成高效的目标代码程序</td>
+<td>可以进行编译优化</td>
+</tr>
+<tr>
+<td>控制方式</td>
+<td>微程序</td>
+<td>组合逻辑（硬布线）</td>
+</tr>
+<tr>
+<td>指令流水线</td>
+<td>可通过一定的方式实现</td>
+<td>必须满足流水线技术</td>
+</tr>
+<tr>
+<td>代表架构</td>
+<td>X86</td>
+<td>ARM、MIPS</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+    </div>
+
+
+<div>
+  
+    <div>
+  
+    <div style="text-align:center;color: #7e0c6e;font-size:18px;">本文到此结束，欢迎邮件交流：3143935826@qq.com <i class="fa fa-paw"></i> ฅ&gt;ω&lt;*ฅ</div>
+  
+</div>
+
+  
+</div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%80%83%E7%A0%94/" rel="tag"># 考研</a>
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" rel="tag"># 计算机组成原理</a>
+              <a href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag"># 笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/08/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%89-%EF%BC%9A%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/" rel="prev" title="计算机组成原理(三)：存储系统">
+      <i class="fa fa-chevron-left"></i> 计算机组成原理(三)：存储系统
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%BC%95%E8%A8%80"><span class="nav-text">一、引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%8C%87%E4%BB%A4%E6%A0%BC%E5%BC%8F"><span class="nav-text">二、指令格式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E6%8C%89%E7%85%A7%E5%9C%B0%E5%9D%80%E7%A0%81%E6%95%B0%E7%9B%AE%E5%88%86%E7%B1%BB"><span class="nav-text">1.按照地址码数目分类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E6%8C%89%E7%85%A7%E6%8C%87%E4%BB%A4%E9%95%BF%E5%BA%A6%E5%88%86%E7%B1%BB"><span class="nav-text">2.按照指令长度分类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E6%8C%89%E7%85%A7%E6%93%8D%E4%BD%9C%E7%A0%81%E9%95%BF%E5%BA%A6%E5%88%86%E7%B1%BB"><span class="nav-text">3.按照操作码长度分类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E6%89%A9%E5%B1%95%E6%93%8D%E4%BD%9C%E7%A0%81%E6%8C%87%E4%BB%A4%E6%A0%BC%E5%BC%8F"><span class="nav-text">4.扩展操作码指令格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E6%8C%89%E7%85%A7%E6%93%8D%E4%BD%9C%E7%B1%BB%E5%9E%8B%E5%88%86%E7%B1%BB"><span class="nav-text">5.按照操作类型分类</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%8C%87%E4%BB%A4%E5%AF%BB%E5%9D%80%E6%96%B9%E5%BC%8F"><span class="nav-text">三、指令寻址方式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E6%8C%87%E4%BB%A4%E5%AF%BB%E5%9D%80"><span class="nav-text">1.指令寻址</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E6%95%B0%E6%8D%AE%E5%AF%BB%E5%9D%80%E3%80%90%E9%87%8D%E7%82%B9%EF%BC%9A%E5%8D%81%E7%A7%8D%E3%80%91"><span class="nav-text">2.数据寻址【重点：十种】</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E6%9C%BA%E5%99%A8%E7%BA%A7%E4%BB%A3%E7%A0%81%E2%80%94%E2%80%94%E6%B1%87%E7%BC%96"><span class="nav-text">四、机器级代码——汇编</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%94%E3%80%81CISC-amp-RISC"><span class="nav-text">五、CISC&amp;RISC</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Yuzhao Peng"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Yuzhao Peng</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yuzhao-peng" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yuzhao-peng" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yuzhao Peng</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">20k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">18 分钟</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
