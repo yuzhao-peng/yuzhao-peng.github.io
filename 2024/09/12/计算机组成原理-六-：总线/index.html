@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="一、引言这一篇是一个小章相对来说比较轻松，Let’s go！">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机组成原理(六)：总线">
+<meta property="og:url" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%85%AD-%EF%BC%9A%E6%80%BB%E7%BA%BF/index.html">
+<meta property="og:site_name" content="Yuzhao&#39;s Blog">
+<meta property="og:description" content="一、引言这一篇是一个小章相对来说比较轻松，Let’s go！">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%85%AD-%EF%BC%9A%E6%80%BB%E7%BA%BF/image-20240901162203904.png">
+<meta property="og:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%85%AD-%EF%BC%9A%E6%80%BB%E7%BA%BF/image-20240901162247656.png">
+<meta property="og:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%85%AD-%EF%BC%9A%E6%80%BB%E7%BA%BF/image-20240901162307480.png">
+<meta property="og:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%85%AD-%EF%BC%9A%E6%80%BB%E7%BA%BF/image-20240901162748579.png">
+<meta property="article:published_time" content="2024-09-12T13:55:26.000Z">
+<meta property="article:modified_time" content="2024-09-12T13:57:32.608Z">
+<meta property="article:author" content="Yuzhao Peng">
+<meta property="article:tag" content="考研">
+<meta property="article:tag" content="计算机组成原理">
+<meta property="article:tag" content="笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%85%AD-%EF%BC%9A%E6%80%BB%E7%BA%BF/image-20240901162203904.png">
+
+<link rel="canonical" href="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%85%AD-%EF%BC%9A%E6%80%BB%E7%BA%BF/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>计算机组成原理(六)：总线 | Yuzhao's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Yuzhao's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%85%AD-%EF%BC%9A%E6%80%BB%E7%BA%BF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Yuzhao Peng">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yuzhao's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          计算机组成原理(六)：总线
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-09-12 21:55:26 / 修改时间：21:57:32" itemprop="dateCreated datePublished" datetime="2024-09-12T21:55:26+08:00">2024-09-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%80%83%E7%A0%94/" itemprop="url" rel="index"><span itemprop="name">考研</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%80%83%E7%A0%94/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="一、引言"><a href="#一、引言" class="headerlink" title="一、引言"></a>一、引言</h1><p>这一篇是一个小章相对来说比较轻松，Let’s go！</p>
+<span id="more"></span>
+<h1 id="二、总线概述"><a href="#二、总线概述" class="headerlink" title="二、总线概述"></a>二、总线概述</h1><p><strong>总线特性</strong></p>
+<ul>
+<li>机械特性：尺寸、形状、管脚数、排列顺序</li>
+<li>电气特性：传输方向、有效电平范围</li>
+<li>功能特性：地址总线、数据总线、控制总线</li>
+<li>时间特性：信号与时序的关系</li>
+</ul>
+<p><strong>总线的分类</strong></p>
+<ul>
+<li><p><strong>数据传输方式</strong></p>
+<ul>
+<li>串行总线<ul>
+<li>优点：只需要一条传输线，成本较低，广泛用于长距离传输</li>
+<li>缺点：数据发送和接收时需要进行拆卸和装配，要考虑串行-并行转换</li>
+</ul>
+</li>
+<li>并行总线<ul>
+<li>优点：逻辑时序简单</li>
+<li>缺点：信号线数量多；远距离传输成本高；信号线高频干扰</li>
+</ul>
+</li>
+<li><strong>串行总线不一定比并行总线慢</strong></li>
+</ul>
+</li>
+<li><p><strong>功能层次</strong></p>
+<ul>
+<li><p>片内总线</p>
+<p>芯片内部的总线：CPU芯片内部寄存器之间、寄存器与ALU之间的公共连接线</p>
+</li>
+<li><p>系统总线</p>
+<p>计算机个功能部件（CPU、主存、IO接口）之间相互连接的总线</p>
+<ul>
+<li><p>数据总线：双向传输，位数与机器字长、存储字长有关</p>
+<blockquote>
+<p>数据通路：数据流经的路径，地址总线也可以作为数据通路</p>
+<p>数据总线：媒介</p>
+</blockquote>
+</li>
+<li><p>地址总线：主存单元、IO接口地址，单向传输，位数与主存地址空间大小有关</p>
+</li>
+<li><p>控制总线：出、入</p>
+</li>
+</ul>
+</li>
+<li><p>通信总线：计算机系统之间信息传递的总线，也称外部总线</p>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>系统总线的结构</strong></p>
+<p><img src="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%85%AD-%EF%BC%9A%E6%80%BB%E7%BA%BF/image-20240901162203904.png" alt="image-20240901162203904"></p>
+<p><img src="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%85%AD-%EF%BC%9A%E6%80%BB%E7%BA%BF/image-20240901162247656.png" alt="image-20240901162247656"></p>
+<p><img src="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%85%AD-%EF%BC%9A%E6%80%BB%E7%BA%BF/image-20240901162307480.png" alt="image-20240901162307480"></p>
+<p><em>四总线结构</em></p>
+<p><img src="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%85%AD-%EF%BC%9A%E6%80%BB%E7%BA%BF/image-20240901162748579.png" alt="image-20240901162748579"><strong>猝发（突发）</strong>    送出一个地址，收到多个地址连续的数据</p>
+<h1 id="三、总线的性能指标"><a href="#三、总线的性能指标" class="headerlink" title="三、总线的性能指标"></a>三、总线的性能指标</h1><p><strong>总线的传输周期（总线周期）</strong>    一次总线操作所需时间（四个阶段：申请、寻址、传输、结束），通常由若干个总线时钟周期构成【注意：总线周期和总线时钟周期之间可能是一对多、一对一、多对一】</p>
+<p><strong>总线时钟周期</strong>    机器的时钟周期，现在的总线时钟周期可能由桥接器提供</p>
+<p><strong>总线的工作频率</strong>    总线上的各种操作的频率，总线周期的倒数；若总线周期为n个时钟周期，那么总线的工作频率为时钟频率/n；实际上指的是一秒钟传送几次数据</p>
+<p><strong>总线的时钟频率</strong>    机器的时钟周期，时钟周期的倒数</p>
+<p><strong>总线宽度（总线位宽）</strong>    总线上同时能够传输的数据位数，通常指数据总线的根数</p>
+<p><strong>总线带宽</strong>    总线的数据传输速率，单位时间内总线上可传输数据的位数，单位：字节/秒</p>
+<script type="math/tex; mode=display">
+\begin{align}
+总线带宽=&总线工作频率\times总线宽度/8(B/s)\\
+=&\frac{总线宽度/8}{总线周期}(B/s)
+\end{align}</script><blockquote>
+<p>总线带宽时总线本身能达到的最高传输速率，而实际的有效数据传输速率需要用实际传输的数据量除以耗时。</p>
+</blockquote>
+<p><strong>总线复用</strong>    一种信号线在不同的时间传输不同的内容</p>
+<p><strong>信号线数</strong>    地址总线、数据总线、控制总线的总线数之和</p>
+<h1 id="四、总线事务与定时"><a href="#四、总线事务与定时" class="headerlink" title="四、总线事务与定时"></a>四、总线事务与定时</h1><p><strong>总线周期的四个阶段</strong></p>
+<ul>
+<li>请求阶段</li>
+<li>寻址阶段</li>
+<li>传输阶段</li>
+<li>结束阶段</li>
+</ul>
+<p><strong>总线定时</strong></p>
+<ul>
+<li><strong>同步定时方式</strong><ul>
+<li>优点：速度快，逻辑简单</li>
+<li>缺点：主从强制同步，可靠性较差</li>
+</ul>
+</li>
+<li><strong>异步定时方式</strong><ul>
+<li><strong>不互锁</strong>——主设备请求撤销时刻能够在从设备回答之前【速度最快，可靠性最差】</li>
+<li><strong>半互锁</strong>——主设备请求撤销时刻一定在从设备回答之后，从设备回答撤销时刻无所谓</li>
+<li><strong>全互锁</strong>——主设备请求撤销时刻一定在从设备回答之后，从设备回答撤销时刻一定在主设备请求撤销之后【速度最慢，可靠性最好】</li>
+<li>优点：总线周期长度可变</li>
+<li>缺点：控制方式复杂，速度较慢</li>
+</ul>
+</li>
+<li><strong>半同步定时方式</strong>    同步+异步；统一时钟周期基础上增加等待信号</li>
+<li><strong>分离式定时方式</strong>    不传送数据时释放总线，不存在空闲等待</li>
+</ul>
+
+    </div>
+
+
+<div>
+  
+    <div>
+  
+    <div style="text-align:center;color: #7e0c6e;font-size:18px;">本文到此结束，欢迎邮件交流：3143935826@qq.com <i class="fa fa-paw"></i> ฅ&gt;ω&lt;*ฅ</div>
+  
+</div>
+
+  
+</div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%80%83%E7%A0%94/" rel="tag"># 考研</a>
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" rel="tag"># 计算机组成原理</a>
+              <a href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag"># 笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/" rel="prev" title="计算机组成原理(五)：中央处理器">
+      <i class="fa fa-chevron-left"></i> 计算机组成原理(五)：中央处理器
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%83-%EF%BC%9A%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E7%B3%BB%E7%BB%9F/" rel="next" title="计算机组成原理(七)：输入输出系统">
+      计算机组成原理(七)：输入输出系统 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%BC%95%E8%A8%80"><span class="nav-text">一、引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%80%BB%E7%BA%BF%E6%A6%82%E8%BF%B0"><span class="nav-text">二、总线概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%80%BB%E7%BA%BF%E7%9A%84%E6%80%A7%E8%83%BD%E6%8C%87%E6%A0%87"><span class="nav-text">三、总线的性能指标</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E6%80%BB%E7%BA%BF%E4%BA%8B%E5%8A%A1%E4%B8%8E%E5%AE%9A%E6%97%B6"><span class="nav-text">四、总线事务与定时</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Yuzhao Peng"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Yuzhao Peng</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yuzhao-peng" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yuzhao-peng" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yuzhao Peng</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">30k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">27 分钟</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

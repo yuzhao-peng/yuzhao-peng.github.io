@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="一、引言其实这是最后一篇，但是为了保持发布顺序，最终积压在了这里，一次性发布~">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机组成原理(五)：中央处理器">
+<meta property="og:url" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/index.html">
+<meta property="og:site_name" content="Yuzhao&#39;s Blog">
+<meta property="og:description" content="一、引言其实这是最后一篇，但是为了保持发布顺序，最终积压在了这里，一次性发布~">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240910221614953.png">
+<meta property="og:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240911162152646.png">
+<meta property="og:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240911222411902.png">
+<meta property="og:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240912160619463.png">
+<meta property="og:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240912160655926.png">
+<meta property="og:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240911223255925.png">
+<meta property="og:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240911223057801.png">
+<meta property="og:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240912170934053.png">
+<meta property="og:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240912171036699.png">
+<meta property="og:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240912171057729.png">
+<meta property="og:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240912171235984.png">
+<meta property="article:published_time" content="2024-09-12T13:55:05.000Z">
+<meta property="article:modified_time" content="2024-09-12T13:57:49.381Z">
+<meta property="article:author" content="Yuzhao Peng">
+<meta property="article:tag" content="考研">
+<meta property="article:tag" content="计算机组成原理">
+<meta property="article:tag" content="笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240910221614953.png">
+
+<link rel="canonical" href="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>计算机组成原理(五)：中央处理器 | Yuzhao's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Yuzhao's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Yuzhao Peng">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yuzhao's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          计算机组成原理(五)：中央处理器
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-09-12 21:55:05 / 修改时间：21:57:49" itemprop="dateCreated datePublished" datetime="2024-09-12T21:55:05+08:00">2024-09-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%80%83%E7%A0%94/" itemprop="url" rel="index"><span itemprop="name">考研</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%80%83%E7%A0%94/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="一、引言"><a href="#一、引言" class="headerlink" title="一、引言"></a>一、引言</h1><p>其实这是最后一篇，但是为了保持发布顺序，最终积压在了这里，一次性发布~</p>
+<span id="more"></span>
+<h1 id="二、中央处理器"><a href="#二、中央处理器" class="headerlink" title="二、中央处理器"></a>二、中央处理器</h1><h2 id="（一）功能与基本结构"><a href="#（一）功能与基本结构" class="headerlink" title="（一）功能与基本结构"></a>（一）功能与基本结构</h2><h3 id="1-功能"><a href="#1-功能" class="headerlink" title="1.功能"></a>1.功能</h3><ol>
+<li><strong>指令控制</strong>    程序顺序控制：取指、分析、执行</li>
+<li><strong>操作控制</strong>    产生操作信号并将其传输到相应部件</li>
+<li><strong>时间控制</strong></li>
+<li><strong>数据加工</strong></li>
+<li><strong>中断处理</strong></li>
+</ol>
+<h3 id="2-基本结构"><a href="#2-基本结构" class="headerlink" title="2.基本结构"></a>2.基本结构</h3><script type="math/tex; mode=display">
+中央处理器(CPU)\begin{cases}
+运算器\begin{cases}
+算术逻辑单元(ALU)\\
+暂存寄存器\\
+累加寄存器\\
+通用寄存器组\\
+\mathbf{程序状态字寄存器(PSW)}\\
+\dots
+\end{cases}\\
+控制器(CU)\begin{cases}
+程序计数器(PC)\\
+指令寄存器\\
+指令译码器\\
+\mathbf{存储器地址寄存器(MAR)}\\
+\mathbf{存储器数据寄存器(MDR)}\\
+\dots
+\end{cases}
+\end{cases}</script><p><strong>CPU的寄存器</strong></p>
+<p>按照汇编语言是否可以访问的区别分类：</p>
+<ul>
+<li>用户可见寄存器</li>
+<li>用户不可见寄存器：MAR、MDR、指令寄存器、暂存寄存器</li>
+</ul>
+<script type="math/tex; mode=display">
+运算器\begin{cases}
+通用寄存器组(GPRs)\\
+累加寄存器(ACC)\\
+移位寄存器(SR)\\
+暂存寄存器\\
+\mathbf{程序状态字寄存器(PSR)}
+\end{cases}</script><script type="math/tex; mode=display">
+控制器\begin{cases}
+程序状态寄存器(PC)\\
+指令寄存器(IR)\\
+\mathbf{存储器地址寄存器(MAR)}\\
+\mathbf{存储器数据寄存器(MDR)}
+\end{cases}</script><h2 id="（二）指令执行过程"><a href="#（二）指令执行过程" class="headerlink" title="（二）指令执行过程"></a>（二）指令执行过程</h2><h3 id="1-基本概念"><a href="#1-基本概念" class="headerlink" title="1.基本概念"></a>1.基本概念</h3><p><strong>指令周期</strong>    CPU每<strong>取出并执行</strong>一条指令所需要的全部时间</p>
+<blockquote>
+<p>这里再次对比一些相似的概念：</p>
+<ul>
+<li><p>机器字长    简称字长，x位机器中x指的就是机器字长，指的是计算机进行一次定点整数运算所能处理的二进制数据的位数</p>
+</li>
+<li><p>存储字长    一次存取操作的数据量，一个存储单元存储的二进制代码位数 </p>
+<blockquote>
+<p>存储单元由存储元件组成，一个存储元件的容量是一位</p>
+</blockquote>
+</li>
+<li><p>指令字长    一个指令字中包含的二进制代码位数，一般情况下是存储字长的整数倍</p>
+</li>
+<li><p>时钟周期    CPU工作的最小单位，又称节拍、CPU时钟周期</p>
+</li>
+<li><p>CPU周期    又称机器周期，包含若干个时钟周期</p>
+</li>
+<li><p>指令周期    包含若干机器周期</p>
+</li>
+</ul>
+</blockquote>
+<p><img src="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240910221614953.png" alt="image-20240910221614953"></p>
+<p><strong>间址周期</strong>    在间接寻址过程中介于取值周期和执行周期之间的时间，其任务是取操作数有效地址</p>
+<h3 id="2-指令执行方案"><a href="#2-指令执行方案" class="headerlink" title="2.指令执行方案"></a>2.指令执行方案</h3><p><strong>单周期处理器</strong>    所有指令的执行时间相同——一个时钟周期，时钟周期至少满足所需要时间最长的指令，此时$CPI=1$，指令串行执行。</p>
+<blockquote>
+<p><strong>CPI（Cycle Per Instruction）</strong>    执行一条指令所需要的时钟周期数</p>
+</blockquote>
+<p><strong>多周期处理器</strong>    对不同类型的指令选择不同的时钟周期数，此时$CPI&gt;1$，指令串行执行。</p>
+<p><strong>流水线处理器</strong>    指令并行执行，理想条件下，每一个时钟周期完成一条指令，此时$CPI=1$，一般情况下$CPI&gt;1$。</p>
+<h1 id="三、数据通路"><a href="#三、数据通路" class="headerlink" title="三、数据通路"></a>三、数据通路</h1><h2 id="（一）功能与组成"><a href="#（一）功能与组成" class="headerlink" title="（一）功能与组成"></a>（一）功能与组成</h2><blockquote>
+<p>CPU的组成的不同表述：</p>
+<ol>
+<li>运算器+控制器</li>
+<li>数据通路+控制部件</li>
+</ol>
+</blockquote>
+<p><strong>数据通路</strong>    数据在执行过程当中所经过的路径，包括总线和路径上的其他部件。</p>
+<script type="math/tex; mode=display">
+数据通路\begin{cases}
+组合逻辑元件&——操作原件：\\
+&任何时刻的输出仅仅取决于当前的输入，如：加法器、ALU、译码器、多路选择器、三态门【一种控制开关】等。\\
+&不含存储信号的记忆元件\\
+时序逻辑元件&——状态元件：\\
+&任何时刻的输出不仅与当前的输入有关，还与过去的输入有关，包含存储信号的记忆元件；各类寄存器、存储器
+\end{cases}</script><h2 id="（二）数据通路的基本结构"><a href="#（二）数据通路的基本结构" class="headerlink" title="（二）数据通路的基本结构"></a>（二）数据通路的基本结构</h2><h3 id="1-单总线方式"><a href="#1-单总线方式" class="headerlink" title="1.单总线方式"></a>1.单总线方式</h3><p>结构简单，但数据传输存在较多的冲突现象，性能较低；注意单周期处理器不能采用单总线方式</p>
+<h3 id="2-多总线方式"><a href="#2-多总线方式" class="headerlink" title="2.多总线方式"></a>2.多总线方式</h3><p>一个时钟内可在不同的总线上传输多个不同的数据</p>
+<h3 id="3-专用数据通路方式"><a href="#3-专用数据通路方式" class="headerlink" title="3.专用数据通路方式"></a>3.专用数据通路方式</h3><p>性能较高，硬件量大</p>
+<p><strong>以上涉及到的总线均为内部总线，区别于系统总线</strong></p>
+<h1 id="四、控制器"><a href="#四、控制器" class="headerlink" title="四、控制器"></a>四、控制器</h1><h2 id="（一）结构与功能"><a href="#（一）结构与功能" class="headerlink" title="（一）结构与功能"></a>（一）结构与功能</h2><p><img src="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240911162152646.png" alt="image-20240911162152646"></p>
+<p>主要包括：指令寄存器（IR）、程序计数器（PC）以及控制信号产生电路</p>
+<p><strong>功能</strong></p>
+<ul>
+<li><p>从主存中取指，并指出下一条指令的位置</p>
+<blockquote>
+<p>指令存储在主存中，程序代码在编译成为可执行文件之后对应机器指令，当其运行时必然在主存中</p>
+</blockquote>
+</li>
+<li><p>对指令进行译码或测试，产生相应的操作控制信号，以便启动规定的动作</p>
+</li>
+<li><p>指挥并控制CPU、主存、输入输出设备之间的数据流动方向</p>
+</li>
+</ul>
+<p><strong>分类</strong></p>
+<ul>
+<li><strong>硬布线控制器</strong></li>
+<li><strong>微程序控制器</strong></li>
+</ul>
+<h2 id="（二）硬布线控制器"><a href="#（二）硬布线控制器" class="headerlink" title="（二）硬布线控制器"></a>（二）硬布线控制器</h2><p>由复杂的<strong>组合逻辑门电路和触发器</strong>构成，也称<strong>组合逻辑控制器</strong>，指令操作码是决定控制单元(CU)发出不同控制信号的关键。</p>
+<blockquote>
+<p>组合逻辑当中也有时钟，这是因为我们的控制有先后顺序！</p>
+</blockquote>
+<p><strong>CU的输入信号来源</strong>：</p>
+<ol>
+<li>经过指令译码器译码产生的指令操作码信息</li>
+<li>时序系统产生的机器周期信号和节拍信号</li>
+<li>来自于执行单元的反馈信息——标志</li>
+</ol>
+<p>硬布线控制器的速度取决于电路延迟，适用于高速计算机、RISC架构。硬布线极度依赖于指令的设计，指令系统功能越全，微操作命令越多，电路就越庞杂，调试起来的难度就越大。</p>
+<h2 id="（三）微程序控制器"><a href="#（三）微程序控制器" class="headerlink" title="（三）微程序控制器"></a>（三）微程序控制器</h2><p>微操作信号代码化，将每一条机器指令转化成为一段微程序存入一个专门的存储器——控制存储器中，微操作的控制信号由微指令产生。</p>
+<blockquote>
+<p>机器指令$\to$微程序</p>
+<p>微程序包含若干微指令，微指令对应于一个或多个微操作命令</p>
+</blockquote>
+<p><strong>微命令</strong>    控制部件向执行部件发出的各种控制命令，它是构成控制序列的最小单位；有相容性和互斥性之分。</p>
+<p><strong>微操作</strong>    执行部件收到微命令后所进行的操作。</p>
+<p><em>硬布线控制器中也存在上述两个基本概念</em></p>
+<p><strong>微指令</strong>    若干微命令的集合，包含<strong>操作控制字段（微操作码字段）</strong>和<strong>顺序控制字段（微地址码字段）</strong>。</p>
+<p><strong>微周期</strong>    从控制存储器中去除并执行一条微指令所需的全部时间，通常为一个时钟周期。</p>
+<p><strong>控制存储器（CM）</strong>    存放微程序，在CPU内部，<strong><em>用ROM实现</em></strong>；其单元地址称为微地址。</p>
+<blockquote>
+<p><strong>主存储器（主存、内存）</strong>    存放程序和数据</p>
+</blockquote>
+<p><strong>微程序</strong>    微指令的有序集合，用于描述机器指令，实际上是机器指令的实时解释器。</p>
+<blockquote>
+<ul>
+<li>地址寄存器($MAR$)：主存读/写地址</li>
+<li>微指令地址寄存器($\mu PC/CMAR$)：待执行的微指令在控制存储器中的微地址</li>
+<li>指令寄存器($IR$)：存放从主存中读出的指令</li>
+<li>微指令寄存器($\mu IR/CMDR$)：存放从控制存储器中读出的微指令</li>
+</ul>
+</blockquote>
+<p><img src="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240911222411902.png" alt="image-20240911222411902"></p>
+<ul>
+<li>起始和转移地址形成部件(或简称微地址形成部件)：用于产生初始和后继微地址，以保<br>证微指令的连续执行。</li>
+<li>微指令地址寄存器：接收微地址形成部件送来的微地址，为读取微指令做准备。</li>
+<li>控制存储器：它是微程序控制器的核心部件，用于存放各指令对应的微程序。</li>
+<li>微指令寄存器：其位数等于微指令字长。</li>
+</ul>
+<h2 id="（四）微指令"><a href="#（四）微指令" class="headerlink" title="（四）微指令"></a>（四）微指令</h2><p>微指令的编码方式也称为微指令的控制方式，是指如何对微指令的控制字段进行编码，以形成控制信号。</p>
+<ul>
+<li><p><strong>直接编码（直接控制）方式</strong></p>
+<p>每一位对应于一个微命令；<strong>优点：</strong>简单直观、执行速度快、操作并行性好；<strong>缺点：</strong>微指令字长过长</p>
+</li>
+<li><p><strong>字段直接编码方式</strong></p>
+<p>将微指令的操作控制字段分成若干小字段，把<strong>互斥性</strong>微命令放在<strong>同一字段</strong>中，把<strong>相容性</strong>微命令放在<strong>不同字段</strong>中，每个字段独立编码，每种编码代表一个微命令且各字段编码含义单独定义，与其他字段无关，这就是字段直接编码方式。这种方式可以缩短微指令字长，但因为要通过译码电路后再发出微命令，因此比直接编码方式慢。</p>
+<ul>
+<li>互斥性微命令分在同一段内，相容性微命令分在不同段内。</li>
+<li>每个小段中包含的信息位不能太多，否则将增加译码电路的复杂性和译码时间。</li>
+<li>一般每个小段还要留出一个状态，表示本字段不发出任何微命令。因此，当某字段的长度为3位时，最多只能表示7个互斥的微命令，通常用 000表示不操作。</li>
+</ul>
+</li>
+<li><p><strong>字段间接编码方式</strong></p>
+<p>一个字段的某些微命令需由另一个字段中的某些微命令来解释，由于不是靠字段直接译码发出的微命令，因此称为字段间接编码，也称<strong>隐式编码</strong>。这种方式可进一步缩短微指令字长，但因削弱了微指令的并行控制能力，因此通常作为字段直接编码方式的一种辅助手段。</p>
+</li>
+</ul>
+<p><strong>微指令的地址形成方式</strong></p>
+<ol>
+<li>由微指令的后继地址字段(也称<strong><em>下地址字段</em></strong>)指出。在微指令格式中设置一个后继地址字段，由微指令的后继地址字段直接指出后继微指令的地址，这种方式也称<strong>断定方式</strong>。</li>
+<li>根据机器指令的操作码形成。当机器指令取自指令寄存器后，微指令的地址由操作码经微地址形成部件形成，该部件输出的是对应机器指令微程序的首地址。</li>
+<li>增量计数器法，即$(\mu PC)+1\to\mu PC$，适用于后继微指令地址是连续的情况。</li>
+<li>根据各种标志决定下一条微指令分支转移的地址。</li>
+<li>由硬件直接产生微程序入口地址。电源加电后，第一条微指令的地址可由专门的硬件电路产生，并送至$\mu PC$，这个地址即为取指周期微程序的入口地址。</li>
+</ol>
+<p><strong>水平型微指令</strong></p>
+<p><img src="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240912160619463.png" alt="image-20240912160619463"></p>
+<p><strong>垂直型微指令</strong></p>
+<p><img src="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240912160655926.png" alt="image-20240912160655926"></p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>水平型微指令</th>
+<th>垂直型微指令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>微程序短</td>
+<td>微程序长</td>
+</tr>
+<tr>
+<td>并行能力强</td>
+<td>并行能力弱</td>
+</tr>
+<tr>
+<td>执行速度快</td>
+<td>执行速度慢</td>
+</tr>
+<tr>
+<td>微指令长</td>
+<td>微指令短</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2 id="（五）对比"><a href="#（五）对比" class="headerlink" title="（五）对比"></a>（五）对比</h2><p><img src="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240911223255925.png" alt="image-20240911223255925"></p>
+<h1 id="五、异常与中断机制"><a href="#五、异常与中断机制" class="headerlink" title="五、异常与中断机制"></a>五、异常与中断机制</h1><p><img src="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240911223057801.png" alt="image-20240911223057801"></p>
+<h1 id="六、指令流水线"><a href="#六、指令流水线" class="headerlink" title="六、指令流水线"></a>六、指令流水线</h1><blockquote>
+<p>题外话：不知不觉就只剩下了干货</p>
+</blockquote>
+<p>提到性能就会想到两个词——<strong>时间</strong>、<strong>空间</strong>【<em>说是一个词也行——<strong>时空</strong>，世界是物质的，而运动是物质的存在方式和根本属性，更进一步时空是运动着的物质的存在形式，没想到吧在这里看见了马原。</em>】</p>
+<ul>
+<li><strong>时间并行</strong>：将任务分解为子任务阶段，子阶段所需的硬件不同，因此在同一时刻能够处理不同的子阶段，也就是说在同一时刻内可以执行多个任务——<strong>流水线技术</strong></li>
+<li><strong>空间并行</strong>：资源不够用？那就加！在一个处理机内部设置多个执行相同任务的功能部件，并且让其能够并行工作——<strong>超标量处理机</strong></li>
+</ul>
+<h2 id="（一）五级流水线"><a href="#（一）五级流水线" class="headerlink" title="（一）五级流水线"></a>（一）五级流水线</h2><p>RISC经典老祖宗——MIPS的传统流水线架构，将一条指令的执行过程分为五个阶段（功能段、流水段）：</p>
+<ul>
+<li>取指(IF)：从指令存储器或 Cache 中取指令。</li>
+<li>译码/读寄存器(ID)：操作控制器对指令进行译码，同时从寄存器堆中取操作数。</li>
+<li>执行/计算地址(EX)：执行运算操作或计算地址。</li>
+<li>访存(MEM)：对存储器进行读/写操作。</li>
+<li>写回(WB)：将指令执行结果写回寄存器堆。</li>
+</ul>
+<p>理想情况下，每个时钟周期都有一条指令进入流水线，每个时钟周期都有条指令完成，每条指令的时钟周期数(即$CPI$)都为1。</p>
+<p><strong>指令集要求</strong></p>
+<ul>
+<li>指令长度尽量一致</li>
+<li>指令格式尽量规整【确保源寄存器位置相同】</li>
+<li>采用LOAD/STORE型指令</li>
+<li>边界对齐</li>
+</ul>
+<p><img src="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240912170934053.png" alt="image-20240912170934053"></p>
+<p>每个流水段后面都要增加一个<strong>流水段寄存器</strong>，用于锁存本段处理完的所有数据，以保证本段的执行结果能在下个时钟周期给下一流水段使用。</p>
+<p><strong>时空图</strong></p>
+<p><img src="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240912171036699.png" alt="image-20240912171036699"></p>
+<p><strong>指令执行过程</strong></p>
+<p><img src="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240912171057729.png" alt="image-20240912171057729"></p>
+<h2 id="（二）冒险与处理"><a href="#（二）冒险与处理" class="headerlink" title="（二）冒险与处理"></a>（二）冒险与处理</h2><p><img src="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%BA%94-%EF%BC%9A%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8/image-20240912171235984.png" alt="image-20240912171235984"></p>
+<p>在指令流水线中，可能会遇到一些情况使得后续指令无法正确执行而引起流水线阻塞，这种现象称为<strong>流水线冒险</strong>；包括：结构冒险、数据冒险和控制冒险。</p>
+<h3 id="1-结构冒险"><a href="#1-结构冒险" class="headerlink" title="1.结构冒险"></a>1.结构冒险</h3><p><strong>资源冲突</strong>引起的结构冒险，即有不同指令在同一时刻争用统一功能部件而形成的冲突。</p>
+<p><strong>解决方案</strong></p>
+<ol>
+<li>前一指令访存时，使后一条相关指令及其后续指令暂停一个时钟周期</li>
+<li>设置多个独立的部件，如：寄存器读写口分开、数据存储器和指令存储器分开等</li>
+</ol>
+<h3 id="2-数据冒险"><a href="#2-数据冒险" class="headerlink" title="2.数据冒险"></a>2.数据冒险</h3><p>数据冒险也称<strong>数据相关</strong>，其产生原因是后面指令用到前面指令的结果，而此时前面指令的结果还没有产生。</p>
+<ul>
+<li><p><strong>写后读（RAW）</strong>    前面指令写结果之前，后面指令需要读取结果</p>
+<blockquote>
+<p>注意：读寄存器在译码阶段，即ID阶段</p>
+<p>按序发射、<strong>按序执行</strong></p>
+</blockquote>
+</li>
+</ul>
+<p><strong>解决方案</strong></p>
+<ol>
+<li><p>延迟执行相关指令</p>
+<p>软件——nop空指令</p>
+<p>硬件——阻塞（stall）</p>
+</li>
+<li><p>转发/旁路技术：两条旁路</p>
+</li>
+<li><p>load-use数据冒险的处理——<strong>无法使用旁路技术</strong>，只能采用延迟的方式，更好的解决策略是在编译时对程序进行优化，调整指令顺序</p>
+</li>
+</ol>
+<h3 id="3-控制冒险"><a href="#3-控制冒险" class="headerlink" title="3.控制冒险"></a>3.控制冒险</h3><p>指令通常是顺序执行的，但当遇到改变指令执行顺序的情况，例如执行转移或返回指令、发生中断或异常时，会改变PC值，从而造成断流，也称<strong>控制冲突</strong>。</p>
+<p>通常把因流水线阻塞带来的延迟时钟周期数称为<strong>延迟损失时间片C</strong>。</p>
+<p><strong>解决方案</strong></p>
+<ol>
+<li>对于由转移指令引起的冲突，可采用和解决数据冲突相同的软件插入“nop”指令和硬件阻塞(stal)的方法。比如，延迟损失多少时间片，就插入多少条nop指令。</li>
+<li>对转移指令进行分支预测，尽早生成转移目标地址。分支预测分为简单(静态)预测和动态预测。若静态预测的条件总是不满足，则按序继续执行分支指令的后续指令。动态预测根据程序转移的历史情况，进行动态预测调整，有较高的预测准确率。</li>
+</ol>
+<blockquote>
+<p>想起来了，在体系结构这里是个大坑！！！计组似乎没有涉及那么多内容。</p>
+</blockquote>
+<h2 id="（三）性能指标"><a href="#（三）性能指标" class="headerlink" title="（三）性能指标"></a>（三）性能指标</h2><p><strong>吞吐率</strong>    单位时间内流水线完成的任务数量或输出结果的数量</p>
+<script type="math/tex; mode=display">
+TP(流水线吞吐率)=\frac{n}{T_k}</script><p>其中，$n$是任务数，$T_k$是处理完$n$个任务所用的总时间。若设$k$为流水线级数（段数），$\Delta t$为时钟周期，那么在理想的条件下，一条$k$级流水线能够在$n+k-1$个时钟周期内完成$n$个任务，则有</p>
+<script type="math/tex; mode=display">
+TP=\frac{n}{(n+k-1)\Delta t}</script><p>当连续输入的任务数$n\to\infty$时，最大吞吐率$TP_{max}=\frac{1}{\Delta t}$</p>
+<p><strong>加速比</strong></p>
+<script type="math/tex; mode=display">
+\begin{align}
+S(加速比)&=\frac{T_{非}}{T_{pipline}}\\
+&=\frac{kn\Delta t}{(n+k-1)\Delta t}\\
+&=\frac{kn}{n+k-1}
+\end{align}</script><p>当连续输入的任务数$n\to\infty$时，最大加速比$S_{max}=\frac{1}{k}$</p>
+<p><strong>效率</strong>    流水线的设备利用率称为流水线的效率</p>
+<p>在时空图上，流水线的效率定义为完成n个任务占用的时空区有效面积与n个任务所用的时间与k个流水段所围成的时空区总面积之比。</p>
+<p>当连续输入的任务数$n\to\infty$时，最大效率$E_{max}=1$</p>
+<h2 id="（四）高级流水线"><a href="#（四）高级流水线" class="headerlink" title="（四）高级流水线"></a>（四）高级流水线</h2><h1 id="七、多处理器"><a href="#七、多处理器" class="headerlink" title="七、多处理器"></a>七、多处理器</h1><div class="table-container">
+<table>
+<thead>
+<tr>
+<th>指令/数据</th>
+<th>单数据流</th>
+<th>多数据流</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>单指令</strong></td>
+<td>SISD</td>
+<td>SIMD</td>
+</tr>
+<tr>
+<td><strong>多指令</strong></td>
+<td>MISD（&#x2716;）</td>
+<td>MIMD</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>SIMD是指一个指令流同时对多个数据流进行处理，一般称为<strong>数据级并行技术</strong>。这种结构的计算机通常由一个指令控制部件、多个处理单元组成。每个处理单元虽然执行的都是同一条指令,但是每个单元都有自己的地址寄存器，这样每个单元就都有不同的数据地址，因此，不同处理单元执行的同一条指令所处理的数据是不同的。一个顺序应用程序被编译后，既可能按SISD组织并运行于串行硬件上，又可能按SIMD组织并运行于并行硬件上。SIMD在使用 for 循环处理数组时最有效。</p>
+<p>MIMD是指同时执行多条指令分别处理多个不同的数据，MIMD分为多计算机系统和多处理器系统。多计算机系统中的每个计算机节点都具有各自的私有存储器，并且具有独立的主存地址空间，不能通过存取指令来访问不同节点的私有存储器，而要通过消息传递进行数据传送，也称消息传递MIMD。多处理器系统是共享存储多处理器(SMP)系统的简称，它具有共享的单一地址空间，通过存取指令来访问系统中的所有存储器，也称共享存储MIMD。<br><strong>向量处理器</strong>是 SIMD的变体，是一种实现了直接操作一维数组(向量)指令集的 CPU，而串行处理器只能处理单一数据集。其基本理念是将从存储器中收集的一组数据按顺序放到一组向量寄存器中，然后以流水化的方式对它们依次操作，最后将结果写回寄存器。向量处理器在特定工作环境中极大地提升了性能，尤其是在数值模拟或者相似的领域中。<br>SIMD 和 MIMD 是两种并行计算模式，其中 SIMD 是一种数据级并行模式，而 MIMD 是一种并行程度更高的线程级并行或线程级以上并行计算模式。</p>
+<blockquote>
+<p>多线程部分结合OS</p>
+</blockquote>
+
+    </div>
+
+
+<div>
+  
+    <div>
+  
+    <div style="text-align:center;color: #7e0c6e;font-size:18px;">本文到此结束，欢迎邮件交流：3143935826@qq.com <i class="fa fa-paw"></i> ฅ&gt;ω&lt;*ฅ</div>
+  
+</div>
+
+  
+</div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%80%83%E7%A0%94/" rel="tag"># 考研</a>
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" rel="tag"># 计算机组成原理</a>
+              <a href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag"># 笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/08/31/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%9B%9B-%EF%BC%9A%E6%8C%87%E4%BB%A4%E7%B3%BB%E7%BB%9F/" rel="prev" title="计算机组成原理(四)：指令系统">
+      <i class="fa fa-chevron-left"></i> 计算机组成原理(四)：指令系统
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%85%AD-%EF%BC%9A%E6%80%BB%E7%BA%BF/" rel="next" title="计算机组成原理(六)：总线">
+      计算机组成原理(六)：总线 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%BC%95%E8%A8%80"><span class="nav-text">一、引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8"><span class="nav-text">二、中央处理器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%EF%BC%88%E4%B8%80%EF%BC%89%E5%8A%9F%E8%83%BD%E4%B8%8E%E5%9F%BA%E6%9C%AC%E7%BB%93%E6%9E%84"><span class="nav-text">（一）功能与基本结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%8A%9F%E8%83%BD"><span class="nav-text">1.功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%9F%BA%E6%9C%AC%E7%BB%93%E6%9E%84"><span class="nav-text">2.基本结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%EF%BC%88%E4%BA%8C%EF%BC%89%E6%8C%87%E4%BB%A4%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B"><span class="nav-text">（二）指令执行过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-text">1.基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%8C%87%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%96%B9%E6%A1%88"><span class="nav-text">2.指令执行方案</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF"><span class="nav-text">三、数据通路</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%EF%BC%88%E4%B8%80%EF%BC%89%E5%8A%9F%E8%83%BD%E4%B8%8E%E7%BB%84%E6%88%90"><span class="nav-text">（一）功能与组成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%EF%BC%88%E4%BA%8C%EF%BC%89%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF%E7%9A%84%E5%9F%BA%E6%9C%AC%E7%BB%93%E6%9E%84"><span class="nav-text">（二）数据通路的基本结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%8D%95%E6%80%BB%E7%BA%BF%E6%96%B9%E5%BC%8F"><span class="nav-text">1.单总线方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%A4%9A%E6%80%BB%E7%BA%BF%E6%96%B9%E5%BC%8F"><span class="nav-text">2.多总线方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E4%B8%93%E7%94%A8%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF%E6%96%B9%E5%BC%8F"><span class="nav-text">3.专用数据通路方式</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E6%8E%A7%E5%88%B6%E5%99%A8"><span class="nav-text">四、控制器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%EF%BC%88%E4%B8%80%EF%BC%89%E7%BB%93%E6%9E%84%E4%B8%8E%E5%8A%9F%E8%83%BD"><span class="nav-text">（一）结构与功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%EF%BC%88%E4%BA%8C%EF%BC%89%E7%A1%AC%E5%B8%83%E7%BA%BF%E6%8E%A7%E5%88%B6%E5%99%A8"><span class="nav-text">（二）硬布线控制器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%EF%BC%88%E4%B8%89%EF%BC%89%E5%BE%AE%E7%A8%8B%E5%BA%8F%E6%8E%A7%E5%88%B6%E5%99%A8"><span class="nav-text">（三）微程序控制器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%EF%BC%88%E5%9B%9B%EF%BC%89%E5%BE%AE%E6%8C%87%E4%BB%A4"><span class="nav-text">（四）微指令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%EF%BC%88%E4%BA%94%EF%BC%89%E5%AF%B9%E6%AF%94"><span class="nav-text">（五）对比</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E5%BC%82%E5%B8%B8%E4%B8%8E%E4%B8%AD%E6%96%AD%E6%9C%BA%E5%88%B6"><span class="nav-text">五、异常与中断机制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E6%8C%87%E4%BB%A4%E6%B5%81%E6%B0%B4%E7%BA%BF"><span class="nav-text">六、指令流水线</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%EF%BC%88%E4%B8%80%EF%BC%89%E4%BA%94%E7%BA%A7%E6%B5%81%E6%B0%B4%E7%BA%BF"><span class="nav-text">（一）五级流水线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%EF%BC%88%E4%BA%8C%EF%BC%89%E5%86%92%E9%99%A9%E4%B8%8E%E5%A4%84%E7%90%86"><span class="nav-text">（二）冒险与处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%BB%93%E6%9E%84%E5%86%92%E9%99%A9"><span class="nav-text">1.结构冒险</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%95%B0%E6%8D%AE%E5%86%92%E9%99%A9"><span class="nav-text">2.数据冒险</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%8E%A7%E5%88%B6%E5%86%92%E9%99%A9"><span class="nav-text">3.控制冒险</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%EF%BC%88%E4%B8%89%EF%BC%89%E6%80%A7%E8%83%BD%E6%8C%87%E6%A0%87"><span class="nav-text">（三）性能指标</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%EF%BC%88%E5%9B%9B%EF%BC%89%E9%AB%98%E7%BA%A7%E6%B5%81%E6%B0%B4%E7%BA%BF"><span class="nav-text">（四）高级流水线</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E5%A4%9A%E5%A4%84%E7%90%86%E5%99%A8"><span class="nav-text">七、多处理器</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Yuzhao Peng"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Yuzhao Peng</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yuzhao-peng" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yuzhao-peng" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yuzhao Peng</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">30k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">27 分钟</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

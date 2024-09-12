@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="一、引言这是我们计算机组成原理的最后一部分内容啦，再加加油，胜利就在眼前！">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机组成原理(七)：输入输出系统">
+<meta property="og:url" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%83-%EF%BC%9A%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E7%B3%BB%E7%BB%9F/index.html">
+<meta property="og:site_name" content="Yuzhao&#39;s Blog">
+<meta property="og:description" content="一、引言这是我们计算机组成原理的最后一部分内容啦，再加加油，胜利就在眼前！">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%83-%EF%BC%9A%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E7%B3%BB%E7%BB%9F/image-20240902185321532.png">
+<meta property="og:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%83-%EF%BC%9A%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E7%B3%BB%E7%BB%9F/image-20240904211543434.png">
+<meta property="og:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%83-%EF%BC%9A%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E7%B3%BB%E7%BB%9F/image-20240905165707874.png">
+<meta property="og:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%83-%EF%BC%9A%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E7%B3%BB%E7%BB%9F/image-20240905165750281.png">
+<meta property="og:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%83-%EF%BC%9A%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E7%B3%BB%E7%BB%9F/image-20240905165842422.png">
+<meta property="article:published_time" content="2024-09-12T13:55:44.000Z">
+<meta property="article:modified_time" content="2024-09-12T13:58:14.206Z">
+<meta property="article:author" content="Yuzhao Peng">
+<meta property="article:tag" content="考研">
+<meta property="article:tag" content="计算机组成原理">
+<meta property="article:tag" content="笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%83-%EF%BC%9A%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E7%B3%BB%E7%BB%9F/image-20240902185321532.png">
+
+<link rel="canonical" href="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%83-%EF%BC%9A%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E7%B3%BB%E7%BB%9F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>计算机组成原理(七)：输入输出系统 | Yuzhao's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Yuzhao's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%83-%EF%BC%9A%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E7%B3%BB%E7%BB%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Yuzhao Peng">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yuzhao's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          计算机组成原理(七)：输入输出系统
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-09-12 21:55:44 / 修改时间：21:58:14" itemprop="dateCreated datePublished" datetime="2024-09-12T21:55:44+08:00">2024-09-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%80%83%E7%A0%94/" itemprop="url" rel="index"><span itemprop="name">考研</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%80%83%E7%A0%94/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="一、引言"><a href="#一、引言" class="headerlink" title="一、引言"></a>一、引言</h1><p>这是我们计算机组成原理的最后一部分内容啦，再加加油，胜利就在眼前！</p>
+<span id="more"></span>
+<h1 id="二、I-O接口"><a href="#二、I-O接口" class="headerlink" title="二、I/O接口"></a>二、I/O接口</h1><p>I/O控制器，也称<strong>I/O控制器</strong>、设备控制器，负责协调主机和外设之间的数据传输。</p>
+<p><strong>功能</strong></p>
+<ul>
+<li>地址译码和设备选择</li>
+<li>解决主机和外设时序配合问题，协调不同工作速度</li>
+<li>数据缓冲：数据缓冲寄存器（DBR）</li>
+<li>信号格式转换</li>
+<li>传送控制命令和状态信息</li>
+</ul>
+<p><img src="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%83-%EF%BC%9A%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E7%B3%BB%E7%BB%9F/image-20240902185321532.png" alt="image-20240902185321532"></p>
+<p><em>一个IO接口可能连接多个外设。</em></p>
+<ul>
+<li><strong>数据缓冲寄存器</strong>    暂存与CPU或内存之间传送的数据信息</li>
+<li><strong>状态寄存器</strong>    记录接口与设备的状态信息</li>
+<li><strong>控制寄存器</strong>    保存CPU对外设的控制信息</li>
+</ul>
+<p><em>状态寄存器和控制寄存器在传送方向上是相反的，在访问时间上也是错开的，因此可将它们合二为一。</em></p>
+<ul>
+<li>数据线：读/写数据、状态信息、控制信息和<strong>中断类型号</strong></li>
+<li>地址线：I/O接口中的寄存器的地址</li>
+<li>控制线：读/写控制信号、<strong>中断请求</strong>和响应信号、仲裁信号和握手信号</li>
+</ul>
+<p><strong>I/O指令</strong>    特权指令，对数据缓冲寄存器、状态/控制寄存器的访问操作是通过相应的I/O指令来完成的。</p>
+<p><strong>I/O接口的类型</strong></p>
+<ul>
+<li>数据传送方式【外设和接口一侧——外部接口】<ul>
+<li>并行接口    一字节或一个字的所有位同时传送</li>
+<li>串行接口    一位一位地有序传送</li>
+</ul>
+</li>
+<li>主机访问I/O设备的控制方式：程序查询接口、中断接口和DMA接口</li>
+<li>功能选择的灵活性：可编程接口、不可编程接口</li>
+</ul>
+<p><strong>I/O端口</strong>    指I/O接口电路中可被CPU直接访问的<strong>寄存器</strong>，主要有数据端口、状态端口和控制端口</p>
+<p><strong>端口地址与编址方式</strong></p>
+<ul>
+<li><p>I/O端口对应于端口地址</p>
+</li>
+<li><p>独立编址</p>
+<p><strong>I/O映射方式</strong>，对所有的I/O端口单独进行编制，其地址空间与主存地址空间是两个独立的地址空间，其地址空间的范围可以与主存地址空间重叠。其访问需要使用<strong>专用I/O指令</strong>来表明访问的是I/O地址空间，I/O指令地地址码给出I/O端口号。</p>
+<ul>
+<li>优点：地址线较少，I/O端口译码简单，寻址速度快；使用专用I/O指令，可使得程序更加清晰，便于理解和检查</li>
+<li>缺点：I/O指令少，只提供简单的传输操作，程序设计的灵活性较差；控制复杂性较高</li>
+</ul>
+</li>
+<li><p>统一编制</p>
+<p><strong>存储器映射方式</strong>，I/O端口和主存在同一地址空间的不同分段中，根据地址范围区分I/O端口和主存单元，其访问只需要使用统一的<strong>访存指令</strong>。</p>
+<ul>
+<li>优点：无需专门的I/O指令，使得CPU访问I/O的操作更加灵活和方便；I/O访问的保护机制可由虚拟存储管理系统来实现</li>
+<li>缺点：端口地址占用了部分主存地址空间，使主存可用容量变小；译码电路更加复杂，降低了译码速度</li>
+</ul>
+</li>
+</ul>
+<h1 id="三、I-O方式"><a href="#三、I-O方式" class="headerlink" title="三、I/O方式"></a>三、I/O方式</h1><p><strong>程序查询方式</strong></p>
+<ul>
+<li>独占查询：一旦设备被启动，CPU就会以支持寻查询接口状态，CPU花费100%的时间用于I/O操作——CPU串行工作</li>
+<li>定时查询：CPU周期性地查询接口状态，等到满足条件时传送数据，传送结束后返回用户程序，定时查询的时间间隔与设备的数据传输速率有关</li>
+</ul>
+<p><strong>优点</strong>是设计简单、硬件量少；<strong>缺点</strong>是CPU需要花费很多的时间查询和等待，CPU与设备串行工作，效率低。</p>
+<p><strong>程序中断方式</strong></p>
+<p><strong>程序中断</strong>是指在计算机执行程序的过程中，出现某些急需处理的异常情况或特殊请求，CPU暂时中止现行程序，而转去对这些异常情况或特殊请求进行处理，处理完毕后再返回到原程序的断点处，继续执行原程序。</p>
+<p><img src="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%83-%EF%BC%9A%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E7%B3%BB%E7%BB%9F/image-20240904211543434.png" alt="image-20240904211543434"></p>
+<p><strong>工作流程</strong></p>
+<ul>
+<li><p>中断请求</p>
+<ul>
+<li>中断请求标记触发器：当其状态为“1”时，表示该中断源有请求，这些触发器可组成中断请求标记寄存器</li>
+<li><strong>可屏蔽中断</strong>——INTR线，关中断模式下不响应</li>
+<li><strong>不可屏蔽中断</strong>——NMI线，关中断模式下可响应</li>
+</ul>
+</li>
+<li><p>中断响应判优</p>
+<p>中断响应的判优通常是通过硬件排队器（或中断查询程序）实现的</p>
+<ul>
+<li>不可屏蔽中断 &gt; 内部异常 &gt; 可屏蔽中断；</li>
+<li>在内部异常中，硬件故障 &gt; 软件中断；</li>
+<li>DMA 中断请求 &gt; I/O 设备的中断请求；</li>
+<li>在 I/O 传送类中断请求中，高速设备 &gt; 低速设备；输入设备 &gt; 输出设备；实时设备 &gt; 普通设备</li>
+</ul>
+</li>
+<li><p>CPU 响应中断的条件</p>
+<ul>
+<li>中断源有中断请求</li>
+<li>CPU允许中断及开中断（异常和不可屏蔽中断不受此限制）</li>
+<li>一条指令执行完毕（异常不受此限制），且没有更紧迫的任务</li>
+</ul>
+<p><strong>CPU 响应中断的时间是在每条指令执行阶段的结束时刻</strong></p>
+</li>
+<li><p>中断响应过程——中断隐指令</p>
+<ul>
+<li><p>关中断，其目的是保证正常保护程序断点和现场信息</p>
+</li>
+<li><p>保存断点</p>
+<blockquote>
+<p><strong>异常和中断的差异</strong></p>
+<p>异常指令通常并没有执行成功，异常处理后要重新执行，所以其断点通常是当前指令的地址。中断的断点则是下一条指令的地址。</p>
+</blockquote>
+</li>
+<li><p>引出中断服务程序：硬件向量法和软件查询法</p>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>中断向量</strong></p>
+<p>每个中断源都有一个唯一的类型号，每个中断类型号都对应一个中断服务程序，每个中断服务程序都有一个入口地址，即中断向量，CPU必须找到入口地址。把系统中的全部中断向量集中存放到存储器的某个区域内，这个存放中断向量的存储区就称为<strong>中断向量表</strong>。</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th></th>
+<th>单级中断</th>
+<th>多重中断</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>关中断</td>
+<td>关中断</td>
+</tr>
+<tr>
+<td>2</td>
+<td>保存断点</td>
+<td>保存断点</td>
+</tr>
+<tr>
+<td>3</td>
+<td>中断服务程序寻址</td>
+<td>中断服务程序寻址</td>
+</tr>
+<tr>
+<td>4</td>
+<td>保存现场</td>
+<td>保存现场和屏蔽字</td>
+</tr>
+<tr>
+<td>5</td>
+<td>-</td>
+<td>开中断</td>
+</tr>
+<tr>
+<td>6</td>
+<td>执行中断服务程序</td>
+<td>执行中断服务程序</td>
+</tr>
+<tr>
+<td>7</td>
+<td>-</td>
+<td>关中断</td>
+</tr>
+<tr>
+<td>8</td>
+<td>恢复现场</td>
+<td>恢复现场和屏蔽字</td>
+</tr>
+<tr>
+<td>9</td>
+<td>开中断、中断返回</td>
+<td>开中断、中断返回</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>其中，1~3由中断隐指令（硬件自动）完成；4~9由中断服务程序完成。</p>
+<p>每个中断源都有一个屏蔽触发器（MASK），1表示屏蔽该中断源的请求，0表示可以正常请求，所有屏蔽触发器组合在一起便构成一个屏蔽字寄存器，屏蔽字寄存器的内容称为屏蔽字。</p>
+<p><strong>DMA方式</strong></p>
+<p><strong>特点</strong>：</p>
+<ul>
+<li>它使主存与 CPU 的固定联系脱钩，主存既可被 CPU 访问，又可被外设访问。</li>
+<li>在数据块传送时，主存地址的确定、传送数据的计数等都由硬件电路直接实现。</li>
+<li>主存中要开辟专用缓冲区，以及时提供和接收外设的数据。</li>
+<li>DMA 传送速度快，CPU和外设并行工作，提高了系统效率。</li>
+<li>DMA 在传送开始前要通过程序进行预处理，结束后要通过中断方式进行后处理。</li>
+</ul>
+<p><strong>构成</strong></p>
+<ul>
+<li><p>主存地址计数器</p>
+<p>存放要交换数据的主存地址。在传送前，其保存的是传送数据的主存起始地址；每传送一个字，地址寄存器的内容就加1，直至该批数据传送完毕。</p>
+</li>
+<li><p>传送长度计数器</p>
+<p>记录传送数据的总长度。在传送前，其记录的是该批数据的总字数；每传送一个字，计数器就减1，直至计数器为0，表示该批数据传送完毕。</p>
+</li>
+<li><p>数据缓冲寄存器</p>
+<p>暂存每次传送的数据。通常，DMA 接口与主存之间的传送单位为字，而 DMA 与设备之间的传送单位可能为字节或位。</p>
+</li>
+<li><p>DMA 请求触发器</p>
+<p>每当 IO 设备准备好数据后，发出一个控制信号，使 DMA 请求触发器置位。</p>
+</li>
+<li><p>“控制/状态”逻辑</p>
+<p>用于指定传送方向，修改传送参数，并对DMA 请求信号、CPU 响应信号进行协调和同步。</p>
+</li>
+<li><p>中断机构</p>
+<p>当一批数据传送完毕后触发中断机构，向CPU提出中断请求。</p>
+</li>
+</ul>
+<p><img src="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%83-%EF%BC%9A%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E7%B3%BB%E7%BB%9F/image-20240905165707874.png" alt="image-20240905165707874"></p>
+<p><strong>优点</strong></p>
+<p>控制简单，适用于数据传输速率很高的IO设备实现成组数据的传送；</p>
+<p><strong>缺点</strong></p>
+<p>DMA 在访问主存时，CPU基本上处于不工作状态。</p>
+<p><img src="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%83-%EF%BC%9A%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E7%B3%BB%E7%BB%9F/image-20240905165750281.png" alt="image-20240905165750281"></p>
+<p><strong>优点</strong></p>
+<p>既实现了 I/O 传送，又较好地发挥了主存与CPU 的效率；</p>
+<p><strong>缺点</strong></p>
+<p>每挪用一个主存周期，DMA接口都要申请、建立和归还总线控制权。</p>
+<p><img src="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E4%B8%83-%EF%BC%9A%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E7%B3%BB%E7%BB%9F/image-20240905165842422.png" alt="image-20240905165842422"></p>
+<p><strong>优点</strong></p>
+<p>不需要总线控制权的申请、建立和归还过程，具有很高的传送速率；</p>
+<p><strong>缺点</strong></p>
+<p>相应的硬件逻辑变得更复杂。</p>
+
+    </div>
+
+
+<div>
+  
+    <div>
+  
+    <div style="text-align:center;color: #7e0c6e;font-size:18px;">本文到此结束，欢迎邮件交流：3143935826@qq.com <i class="fa fa-paw"></i> ฅ&gt;ω&lt;*ฅ</div>
+  
+</div>
+
+  
+</div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%80%83%E7%A0%94/" rel="tag"># 考研</a>
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" rel="tag"># 计算机组成原理</a>
+              <a href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag"># 笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/09/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86-%E5%85%AD-%EF%BC%9A%E6%80%BB%E7%BA%BF/" rel="prev" title="计算机组成原理(六)：总线">
+      <i class="fa fa-chevron-left"></i> 计算机组成原理(六)：总线
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%BC%95%E8%A8%80"><span class="nav-text">一、引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81I-O%E6%8E%A5%E5%8F%A3"><span class="nav-text">二、I&#x2F;O接口</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%89%E3%80%81I-O%E6%96%B9%E5%BC%8F"><span class="nav-text">三、I&#x2F;O方式</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Yuzhao Peng"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Yuzhao Peng</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yuzhao-peng" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yuzhao-peng" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yuzhao Peng</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">30k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">27 分钟</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
